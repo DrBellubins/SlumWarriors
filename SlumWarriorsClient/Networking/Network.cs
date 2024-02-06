@@ -7,6 +7,7 @@ using System.Numerics;
 
 using LiteNetLib;
 using LiteNetLib.Utils;
+using SlumWarriorsCommon;
 
 namespace SlumWarriorsClient.Networking
 {
@@ -18,16 +19,12 @@ namespace SlumWarriorsClient.Networking
         public static void Start()
         {
             client.Start();
-            client.Connect("localhost", 55404, "SWH");
+            client.Connect("localhost", NetworkSettings.Port, NetworkSettings.Header);
 
             listener.NetworkReceiveEvent += (fromPeer, dataReader, deliveryMethod, channel) =>
             {
-                Engine.CurrentPlayer.Position = new Vector2(dataReader.GetFloat(), dataReader.GetFloat());
+                Console.WriteLine(dataReader.GetString(100));
                 dataReader.Recycle();
-
-                var writer = new NetDataWriter();
-                writer.Put(Engine.CurrentPlayer.MovementVec.X);
-                writer.Put(Engine.CurrentPlayer.MovementVec.Y);
             };
         }
 

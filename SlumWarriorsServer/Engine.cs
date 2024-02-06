@@ -10,19 +10,19 @@ namespace SlumWarriorsServer
 {
     internal class Engine
     {
-        public const int TickRate = 60;
+        public const int TickRate = 30;
         public const int TickDelay = (int)((1f / TickRate) * 1000f);
         public const float TickDelta = 1.0f / TickRate;
 
         public static bool IsRunning;
-
-        public static Server Server = new Server();
 
         public void Initialize()
         {
             IsRunning = true;
 
             // Start
+            Network.Start();
+
             foreach (var script in Script.Scripts)
                 script.Start();
 
@@ -30,14 +30,14 @@ namespace SlumWarriorsServer
             {
                 Thread.Sleep(TickDelay);
 
-                Console.WriteLine($"Test {TickDelay}");
-
                 // Update
-                PacketManager.Update(); // Must be updated first
+                Network.Update(); // Must be updated first
 
                 foreach (var script in Script.Scripts)
                     script.Update(TickDelta);
             }
+
+            Network.Stop();
         }
     }
 }

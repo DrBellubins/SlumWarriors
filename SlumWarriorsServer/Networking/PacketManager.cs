@@ -36,8 +36,8 @@ namespace SlumWarriorsServer.Networking
 
         public static void Update()
         {
-            while (Engine.IsRunning)
-                buffer = Engine.Server.Receive();
+            //while (Engine.IsRunning)
+            //    buffer = Engine.Server.Receive();
         }
 
         public static bool IsPacketValid()

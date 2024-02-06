@@ -19,15 +19,12 @@ namespace SlumWarriorsClient
         public const int MaxFPS = 60;
         public const int ScreenWidth = 1600;
         public const int ScreenHeight = 900;
-        public const int Port = 55404;
 
         public static bool IsRunning;
         public static Font MainFont;
         public static Texture2D DebugTexture;
 
         public static Player CurrentPlayer = new Player();
-
-        public static Client Client = new Client();
 
         public void Initialize()
         {

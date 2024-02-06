@@ -6,6 +6,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
+using SlumWarriorsCommon;
 
 namespace SlumWarriorsClient.Networking
 {
@@ -13,10 +14,10 @@ namespace SlumWarriorsClient.Networking
     {
         private ConcurrentBag<byte[]> packetBuffer = new ConcurrentBag<byte[]>();
 
-        internal UdpClient UDPClient = new UdpClient(Engine.Port);
+        internal UdpClient UDPClient = new UdpClient(NetworkSettings.Port);
 
         // TODO: Change loopback to actual address
-        private IPEndPoint serverEndPoint = new IPEndPoint(IPAddress.Loopback, Engine.Port);
+        private IPEndPoint serverEndPoint = new IPEndPoint(IPAddress.Loopback, NetworkSettings.Port);
 
         public byte[] Receive()
         {

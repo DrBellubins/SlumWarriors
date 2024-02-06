@@ -43,18 +43,18 @@ namespace SlumWarriorsClient.Networking
             sendBuffer.Add((byte)PacketType.Connection);
             //sendBuffer.AddRange(Encoding.ASCII.GetBytes(Player.Username));
 
-            if (sendBuffer.Count == 28)
-                Engine.Client.Send(sendBuffer.ToArray());
+            //if (sendBuffer.Count == 28)
+            //    Engine.Client.Send(sendBuffer.ToArray());
 
             sendBuffer.Clear();
 
             while (Engine.IsRunning)
             {
-                recBuffer = Engine.Client.Receive();
+                //recBuffer = Engine.Client.Receive();
 
                 if (sendBuffer.Count > 0)
                 {
-                    Engine.Client.Send(sendBuffer.ToArray());
+                    //Engine.Client.Send(sendBuffer.ToArray());
                 }
             }
         }
