@@ -17,12 +17,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Gameplay\" />
-    <Folder Include="Utils\" />
+    <PackageReference Include="Raylib-cs" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Raylib-cs" Version="6.0.0" />
+    <ProjectReference Include="..\SlumWarriorsCommon\SlumWarriorsCommon.csproj" />
   </ItemGroup>
 
 </Project>

@@ -5,15 +5,18 @@ using System.Net.Sockets;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
-namespace SlumWarriors.Networking
+namespace SlumWarriorsClient.Networking
 {
     public class Client
     {
-        internal UdpClient UDPClient = new UdpClient(Server.Port);
+        private ConcurrentBag<byte[]> packetBuffer = new ConcurrentBag<byte[]>();
+
+        internal UdpClient UDPClient = new UdpClient(Engine.Port);
 
         // TODO: Change loopback to actual address
-        private IPEndPoint serverEndPoint = new IPEndPoint(IPAddress.Loopback, Server.Port);
+        private IPEndPoint serverEndPoint = new IPEndPoint(IPAddress.Loopback, Engine.Port);
 
         public byte[] Receive()
         {

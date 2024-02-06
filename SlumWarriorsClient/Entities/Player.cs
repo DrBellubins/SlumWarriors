@@ -1,4 +1,4 @@
-﻿using SlumWarriors.Systems;
+﻿using SlumWarriorsCommon.Systems;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,10 +8,10 @@ using System.Numerics;
 using Raylib_cs;
 
 using static Raylib_cs.Raylib;
-using SlumWarriors.Utils;
-using SlumWarriors.Networking;
+using SlumWarriorsClient.Utils;
+using SlumWarriorsClient.Networking;
 
-namespace SlumWarriors.Entities
+namespace SlumWarriorsClient.Entities
 {
     public class Player : Entity
     {
@@ -20,11 +20,8 @@ namespace SlumWarriors.Entities
         public Camera2D Camera;
         public float CameraZoom;
 
-        public override void Start(Packet packet)
+        public override void Start()
         {
-            if (packet.Type == PacketBufferTypes.Connection)
-                Username = (packet.Username != null) ? packet.Username : "Player";
-
             Camera = new Camera2D();
             Camera.Target = new Vector2(Position.X, Position.Y);
             Camera.Offset = new Vector2(UI.CenterPivot.X, UI.CenterPivot.Y);
@@ -32,20 +29,8 @@ namespace SlumWarriors.Entities
             Camera.Zoom = 100.0f;
         }
 
-        public override void Update(Packet packet,float deltaTime)
+        public override void Update(float deltaTime)
         {
-            if (packet.Type == PacketBufferTypes.Runtime)
-            {
-                if (Engine.IsServer)
-                {
-
-                }
-                else
-                {
-
-                }
-            }
-
             Camera.Zoom += GetMouseWheelMove();
 
             if (IsKeyPressed(KeyboardKey.W))

@@ -6,36 +6,38 @@ using System.Threading.Tasks;
 
 using Raylib_cs;
 using System.Numerics;
-using SlumWarriors.Systems;
-using SlumWarriors.Entities;
-using SlumWarriors.Utils;
-using SlumWarriors.Networking;
+using SlumWarriorsCommon.Systems;
+using SlumWarriorsClient.Entities;
+using SlumWarriorsClient.Utils;
+using SlumWarriorsClient.Networking;
 
 // TODO: Figure out how to pass packet data to scripts/entities
-
-namespace SlumWarriors
+namespace SlumWarriorsClient
 {
     internal class Engine
     {
         public const int MaxFPS = 60;
         public const int ScreenWidth = 1600;
         public const int ScreenHeight = 900;
+        public const int Port = 55404;
 
-        public static bool IsServer;
+        public static bool IsRunning;
         public static Font MainFont;
         public static Texture2D DebugTexture;
 
-        public static List<Script> Scripts = new List<Script>();
         public static List<Player> Players = new List<Player>();
 
-        public static Server? server;
-        public static Client? client;
+        public static Client Client = new Client();
+
+        private Thread socketThread = new Thread(() => PacketManager.Update());
 
         public void Initialize()
         {
             // Setup
+            IsRunning = true;
+
             Raylib.InitWindow(ScreenWidth, ScreenHeight, "Slum Warriors Dev");
-            Raylib.SetExitKey(KeyboardKey.Q);
+            Raylib.SetExitKey(KeyboardKey.Null);
             Raylib.SetTargetFPS(MaxFPS);
 
             MainFont = Raylib.LoadFontEx("Assets/Fonts/VarelaRound-Regular.ttf", 64, null, 250);
@@ -47,31 +49,27 @@ namespace SlumWarriors
             var time = 0.0f;
             var deltaTime = 0.0f;
 
-            if (IsServer)
-                server = new Server();
-            else
-                client = new Client();
+            socketThread.Start();
 
             var testPlayer = new Player();
 
             // Start
-            var testConnectPacket = new Packet(PacketBufferTypes.Connection, "TestPlayer");
+            foreach (var script in Script.Scripts)
+                script.Start();
 
-            foreach (var script in Scripts)
-                script.Start(testConnectPacket);
-
-            while (!Raylib.WindowShouldClose())
+            while (IsRunning)
             {
+                if (Raylib.IsKeyPressed(KeyboardKey.Q))
+                    IsRunning = false;
+
                 currentTimer = DateTime.Now;
 
                 // Update
                 deltaTime = (currentTimer.Ticks - previousTimer.Ticks) / 10000000f;
                 time += deltaTime;
 
-                var testRuntimePacket = new Packet(PacketBufferTypes.Runtime);
-
-                foreach (var script in Scripts)
-                    script.Update(testRuntimePacket, deltaTime);
+                foreach (var script in Script.Scripts)
+                    script.Update(deltaTime);
 
                 // Draw
                 Raylib.BeginDrawing();
@@ -81,7 +79,7 @@ namespace SlumWarriors
 
                 Raylib.DrawTexture(DebugTexture, 0, 0, Color.White);
 
-                foreach (var script in Scripts)
+                foreach (var script in Script.Scripts)
                 {
                     if (script.GetType().IsSubclassOf(typeof(Script)))
                     {
@@ -97,6 +95,12 @@ namespace SlumWarriors
             }
 
             Raylib.CloseWindow();
+            Environment.Exit(0);
+        }
+
+        public void Close()
+        {
+            IsRunning = false;
         }
     }
 }

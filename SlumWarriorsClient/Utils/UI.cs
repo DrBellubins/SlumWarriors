@@ -7,7 +7,7 @@ using System.Numerics;
 
 using Raylib_cs;
 
-namespace SlumWarriors.Utils
+namespace SlumWarriorsClient.Utils
 {
     public class UI
     {

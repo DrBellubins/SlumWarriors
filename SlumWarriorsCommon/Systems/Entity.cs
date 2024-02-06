@@ -5,7 +5,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SlumWarriors.Systems
+namespace SlumWarriorsCommon.Systems
 {
     public abstract class Entity : Script
     {

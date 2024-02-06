@@ -1,11 +1,10 @@
-﻿namespace SlumWarriors
+﻿namespace SlumWarriorsClient
 {
     internal class Program
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Starting engine...");
-            Engine.IsServer = args[0] == "--server";
+            Console.WriteLine("Hello, World! Starting engine...");
 
             var engine = new Engine();
             engine.Initialize();
