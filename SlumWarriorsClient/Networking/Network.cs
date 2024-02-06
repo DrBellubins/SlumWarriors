@@ -9,6 +9,17 @@ using LiteNetLib;
 using LiteNetLib.Utils;
 using SlumWarriorsCommon;
 
+// Connection buffer format:
+// 3 bytes - Header
+// 1 byte - Type
+// 24 bytes - Username
+
+// Runtime buffer format:
+// 3 bytes - Header
+// 1 byte - Type
+// 8 bytes - Position/Input vec
+// 4 bytes - Rotation
+
 namespace SlumWarriorsClient.Networking
 {
     public static class Network

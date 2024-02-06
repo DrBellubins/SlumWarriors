@@ -7,6 +7,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+// Connection buffer format:
+// 3 bytes - Header
+// 1 byte - Type
+// 24 bytes - Username
+
+// Runtime buffer format:
+// 3 bytes - Header
+// 1 byte - Type
+// 8 bytes - Position/Input vec
+// 4 bytes - Rotation
+
 namespace SlumWarriorsServer.Networking
 {
     public static class Network
