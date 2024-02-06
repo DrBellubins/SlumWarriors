@@ -25,11 +25,9 @@ namespace SlumWarriorsClient
         public static Font MainFont;
         public static Texture2D DebugTexture;
 
-        public static List<Player> Players = new List<Player>();
+        public static Player CurrentPlayer = new Player();
 
         public static Client Client = new Client();
-
-        private Thread socketThread = new Thread(() => PacketManager.Update());
 
         public void Initialize()
         {
@@ -49,11 +47,9 @@ namespace SlumWarriorsClient
             var time = 0.0f;
             var deltaTime = 0.0f;
 
-            socketThread.Start();
-
-            var testPlayer = new Player();
-
             // Start
+            Network.Start();
+
             foreach (var script in Script.Scripts)
                 script.Start();
 
@@ -68,6 +64,8 @@ namespace SlumWarriorsClient
                 deltaTime = (currentTimer.Ticks - previousTimer.Ticks) / 10000000f;
                 time += deltaTime;
 
+                Network.Update();
+
                 foreach (var script in Script.Scripts)
                     script.Update(deltaTime);
 
@@ -75,7 +73,7 @@ namespace SlumWarriorsClient
                 Raylib.BeginDrawing();
                 Raylib.ClearBackground(Color.Black);
 
-                Raylib.BeginMode2D(testPlayer.Camera);
+                Raylib.BeginMode2D(CurrentPlayer.Camera);
 
                 Raylib.DrawTexture(DebugTexture, 0, 0, Color.White);
 
@@ -93,6 +91,8 @@ namespace SlumWarriorsClient
 
                 previousTimer = currentTimer;
             }
+
+            Network.Stop();
 
             Raylib.CloseWindow();
             Environment.Exit(0);

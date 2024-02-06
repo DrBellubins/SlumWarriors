@@ -31,6 +31,8 @@ namespace SlumWarriorsServer.Networking
         public const string Header = "swh";
 
         private static byte[] buffer = new byte[0];
+        private static byte[]? movBuffer { get { return buffer[4..11]; } }
+        private static byte[]? rotBuffer { get { return buffer[12..15]; } }
 
         public static void Update()
         {
@@ -57,10 +59,10 @@ namespace SlumWarriorsServer.Networking
 
         public static Vector2? GetMovement()
         {
-            if (IsPacketValid() && GetPacketType() == PacketType.Runtime)
+            if (IsPacketValid() && GetPacketType() == PacketType.Runtime && movBuffer != null)
             {
-                var xBuf = buffer[4..7];
-                var yBuf = buffer[8..11];
+                var xBuf = movBuffer[0..3];
+                var yBuf = movBuffer[4..7];
 
                 if (xBuf != null && yBuf != null)
                     return new Vector2(BitConverter.ToSingle(xBuf, 0), BitConverter.ToSingle(yBuf, 0));
@@ -71,9 +73,12 @@ namespace SlumWarriorsServer.Networking
 
         public static float GetRotation()
         {
-            if (IsPacketValid() && GetPacketType() == PacketType.Runtime)
+            if (IsPacketValid() && GetPacketType() == PacketType.Runtime && rotBuffer != null)
             {
-                return 0f;
+                var rotBuf = rotBuffer[0..3];
+
+                if (rotBuf != null)
+                    return BitConverter.ToSingle(rotBuf, 0);
             }
 
             return 0f;
