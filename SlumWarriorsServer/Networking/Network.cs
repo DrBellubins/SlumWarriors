@@ -4,6 +4,7 @@ using SlumWarriorsCommon;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -22,8 +23,8 @@ namespace SlumWarriorsServer.Networking
 {
     public static class Network
     {
-        private static NetManager server = new NetManager(listener);
         private static EventBasedNetListener listener = new EventBasedNetListener();
+        private static NetManager server = new NetManager(listener);
 
         public static void Start()
         {
@@ -34,17 +35,36 @@ namespace SlumWarriorsServer.Networking
                 if (server.ConnectedPeersCount < 10)
                     request.AcceptIfKey(NetworkSettings.Header);
                 else
+                {
+                    Console.WriteLine("Connection rejected: Too many players!");
                     request.Reject();
+                }
             };
 
             listener.PeerConnectedEvent += peer =>
             {
-                Console.WriteLine("We got connection: {0}", peer.Address); // Show peer ip
-                NetDataWriter writer = new NetDataWriter(); // Create writer class
+                Console.WriteLine("We got connection: {0}", peer.Address);
+                var writer = new NetDataWriter();
 
-                writer.Put("Hello client!");
+                writer.Put("fc");
 
-                peer.Send(writer, DeliveryMethod.ReliableOrdered); // Send with reliability
+                peer.Send(writer, DeliveryMethod.ReliableOrdered);
+            };
+
+            listener.NetworkReceiveEvent += (fromPeer, dataReader, deliveryMethod, channel) =>
+            {
+                var writer = new NetDataWriter();
+
+                if (dataReader.GetString(2) == "sr") // spawnpoint request
+                {
+                    writer.Put("pu");
+                    writer.Put(10.5f);
+                    writer.Put(10.5f);
+
+                    fromPeer.Send(writer, DeliveryMethod.ReliableOrdered);
+                }
+
+                dataReader.Recycle();
             };
         }
 

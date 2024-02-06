@@ -10,7 +10,7 @@ namespace SlumWarriorsServer
 {
     internal class Engine
     {
-        public const int TickRate = 30;
+        public const int TickRate = 60;
         public const int TickDelay = (int)((1f / TickRate) * 1000f);
         public const float TickDelta = 1.0f / TickRate;
 

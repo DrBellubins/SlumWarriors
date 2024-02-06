@@ -24,8 +24,8 @@ namespace SlumWarriorsClient.Networking
 {
     public static class Network
     {
-        private static NetManager client = new NetManager(listener);
         private static EventBasedNetListener listener = new EventBasedNetListener();
+        private static NetManager client = new NetManager(listener);
 
         public static void Start()
         {
@@ -34,7 +34,20 @@ namespace SlumWarriorsClient.Networking
 
             listener.NetworkReceiveEvent += (fromPeer, dataReader, deliveryMethod, channel) =>
             {
-                Console.WriteLine(dataReader.GetString(100));
+                var writer = new NetDataWriter();
+
+                var cType = dataReader.GetString(2);
+
+                if (cType == "fc") // First connection
+                {
+                    writer.Put("sr"); // spawnpoint request
+                    fromPeer.Send(writer, DeliveryMethod.ReliableOrdered);
+                }
+                else if (cType == "pu") // Pos Update
+                {
+                    Engine.CurrentPlayer.Position = new Vector2(dataReader.GetFloat(), dataReader.GetFloat());
+                }
+
                 dataReader.Recycle();
             };
         }
