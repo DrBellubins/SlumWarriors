@@ -4,7 +4,11 @@
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
+            Console.WriteLine("Starting engine...");
+            Engine.IsServer = args[0] == "--server";
+
+            var engine = new Engine();
+            engine.Initialize();
         }
     }
 }
