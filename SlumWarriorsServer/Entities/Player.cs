@@ -1,7 +1,7 @@
 ﻿using LiteNetLib.Utils;
 using LiteNetLib;
 using SlumWarriorsCommon.Systems;
-using SlumWarriorsServer.Networking;
+using SlumWarriorsCommon.Networking;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,6 +34,8 @@ namespace SlumWarriorsServer.Entities
             {
                 var spawnPos = new Vector2(10f, 10f);
                 Network.SendVector2(Peer, spawnPos, "pu");
+
+                Position = spawnPos;
             }
 
             hasSpawned = true;
@@ -48,10 +50,13 @@ namespace SlumWarriorsServer.Entities
                 {
                     var rec = Network.Receive(Peer, "mu");
 
-                    if (rec != null && rec.Reader != null)
-                        Position += new Vector2(rec.Reader.GetFloat(), rec.Reader.GetFloat());
+                    if (rec != null && rec.Reader != null) // received mu
+                    {
+                        var movementVec = Vector2.Normalize(new Vector2(rec.Reader.GetFloat(), rec.Reader.GetFloat()));
+                        Position += movementVec;
 
-                    Network.SendVector2(Peer, Position, "pu");
+                        Network.SendVector2(Peer, Position, "pu"); // Never gets sent
+                    }
                 }
             }
         }

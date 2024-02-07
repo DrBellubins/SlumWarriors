@@ -1,4 +1,5 @@
 ﻿using SlumWarriorsCommon.Systems;
+using SlumWarriorsCommon.Networking;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,9 +8,9 @@ using System.Threading.Tasks;
 using System.Numerics;
 using Raylib_cs;
 
-using static Raylib_cs.Raylib;
 using SlumWarriorsClient.Utils;
-using SlumWarriorsClient.Networking;
+
+using static Raylib_cs.Raylib;
 
 namespace SlumWarriorsClient.Entities
 {
@@ -20,6 +21,8 @@ namespace SlumWarriorsClient.Entities
 
         public Camera2D Camera;
         public float CameraZoom;
+
+        private bool isMoving = false;
 
         public override void Start()
         {
@@ -34,6 +37,19 @@ namespace SlumWarriorsClient.Entities
         {
             Camera.Zoom += GetMouseWheelMove();
 
+            // Update position
+            if (Engine.Server != null)
+            {
+                var rec = Network.Receive(Engine.Server, "pu");
+
+                if (rec != null && rec.Reader != null) // received pu
+                    Position = new Vector2(rec.Reader.GetFloat(), rec.Reader.GetFloat());
+            }
+
+            isMoving = IsKeyPressed(KeyboardKey.W) || IsKeyPressed(KeyboardKey.S)
+                || IsKeyPressed(KeyboardKey.D) || IsKeyPressed(KeyboardKey.A);
+
+            // Update movement
             if (IsKeyPressed(KeyboardKey.W))
                 MovementVec.Y = 1f;
 
@@ -46,14 +62,19 @@ namespace SlumWarriorsClient.Entities
             if (IsKeyPressed(KeyboardKey.A))
                 MovementVec.X = 1f;
 
-            Network.SendMovement(MovementVec);
+            // Send movement
+            if (isMoving && Engine.Server != null)
+            {
+                Network.SendVector2(Engine.Server, MovementVec, "mu");
+                MovementVec = Vector2.Zero;
+            }
 
             Camera.Target = Vector2.Lerp(Camera.Target, Position, 3.5f * deltaTime);
         }
 
         public override void Draw(float deltaTime)
         {
-            Raylib.DrawCircleV(Position, 0.5f, Color.Green);
+            DrawCircleV(Position, 0.5f, Color.Green);
         }
     }
 }

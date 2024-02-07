@@ -7,9 +7,10 @@ using System.Threading.Tasks;
 using Raylib_cs;
 using System.Numerics;
 using SlumWarriorsCommon.Systems;
+using SlumWarriorsCommon.Networking;
 using SlumWarriorsClient.Entities;
 using SlumWarriorsClient.Utils;
-using SlumWarriorsClient.Networking;
+using LiteNetLib;
 
 // TODO: Figure out how to pass packet data to scripts/entities
 namespace SlumWarriorsClient
@@ -25,6 +26,7 @@ namespace SlumWarriorsClient
         public static Texture2D DebugTexture;
 
         public static Player CurrentPlayer = new Player();
+        public static NetPeer? Server;
 
         public void Initialize()
         {
@@ -45,7 +47,13 @@ namespace SlumWarriorsClient
             var deltaTime = 0.0f;
 
             // Start
-            Network.Start();
+            Network.Start(false);
+
+            Network.Listener.PeerConnectedEvent += peer =>
+            {
+                Server = peer;
+                CurrentPlayer.Start();
+            };
 
             foreach (var script in Script.Scripts)
                 script.Start();
@@ -66,7 +74,7 @@ namespace SlumWarriorsClient
                 foreach (var script in Script.Scripts)
                     script.Update(deltaTime);
 
-                Network.Update(deltaTime);
+                Network.Update();
 
                 // Draw
                 Raylib.BeginDrawing();

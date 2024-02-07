@@ -25,4 +25,8 @@
     <ProjectReference Include="..\SlumWarriorsCommon\SlumWarriorsCommon.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Networking\" />
+  </ItemGroup>
+
 </Project>

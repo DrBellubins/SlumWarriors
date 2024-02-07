@@ -1,6 +1,6 @@
 ﻿using SlumWarriorsCommon.Systems;
+using SlumWarriorsCommon.Networking;
 using SlumWarriorsServer.Entities;
-using SlumWarriorsServer.Networking;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +26,17 @@ namespace SlumWarriorsServer
             IsRunning = true;
 
             // Start
-            Network.Start();
+            Network.Start(true);
+
+            Network.Listener.PeerConnectedEvent += peer =>
+            {
+                PlayersInitialized++;
+
+                var player = new Player(PlayersInitialized);
+                player.Peer = peer;
+
+                player.Start();
+            };
 
             foreach (var script in Script.Scripts)
                 script.Start();
@@ -44,7 +54,7 @@ namespace SlumWarriorsServer
                 foreach (var player in Players.Values)
                     player.Update(TickDelta);
 
-                Network.Update(TickDelta);
+                Network.Update();
             }
 
             Network.Stop();
