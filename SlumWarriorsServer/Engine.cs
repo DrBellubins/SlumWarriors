@@ -1,4 +1,5 @@
 ﻿using SlumWarriorsCommon.Systems;
+using SlumWarriorsServer.Entities;
 using SlumWarriorsServer.Networking;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,10 @@ namespace SlumWarriorsServer
 
         public static bool IsRunning;
 
+        public static Dictionary<int, Player> Players = new Dictionary<int, Player>();
+
+        public static int PlayersInitialized = 0; // The num of players that ever entered the server (save this to file)
+
         public void Initialize()
         {
             IsRunning = true;
@@ -31,10 +36,15 @@ namespace SlumWarriorsServer
                 Thread.Sleep(TickDelay);
 
                 // Update
-                Network.Update(); // Must be updated first
+                Network.Poll(); // Must be updated first
 
                 foreach (var script in Script.Scripts)
                     script.Update(TickDelta);
+
+                foreach (var player in Players.Values)
+                    player.Update(TickDelta);
+
+                Network.Update(TickDelta);
             }
 
             Network.Stop();

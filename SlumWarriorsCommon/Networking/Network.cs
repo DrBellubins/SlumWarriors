@@ -1,27 +1,14 @@
-﻿using LiteNetLib;
-using LiteNetLib.Utils;
-using SlumWarriorsCommon.Networking;
-using SlumWarriorsServer.Entities;
-using System;
-using System.Collections.Concurrent;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
+using LiteNetLib;
+using LiteNetLib.Utils;
 
-// Connection buffer format:
-// 3 bytes - Header
-// 1 byte - Type
-// 24 bytes - Username
-
-// Runtime buffer format:
-// 3 bytes - Header
-// 1 byte - Type
-// 8 bytes - Position/Input vec
-// 4 bytes - Rotation
-
-namespace SlumWarriorsServer.Networking
+namespace SlumWarriorsCommon.Networking
 {
     public class NetSend
     {
@@ -51,19 +38,19 @@ namespace SlumWarriorsServer.Networking
 
     public static class Network
     {
-        private static EventBasedNetListener listener = new EventBasedNetListener();
-        private static NetManager server = new NetManager(listener);
+        public static EventBasedNetListener Listener = new EventBasedNetListener();
+        public static NetManager Manager = new NetManager(Listener);
 
         private static Queue<NetSend> sendQueue = new Queue<NetSend>();
         private static List<NetReceive> receiveQueue = new List<NetReceive>();
 
         public static void Start()
         {
-            server.Start(NetworkSettings.Port);
+            Manager.Start(NetworkSettings.Port);
 
-            listener.ConnectionRequestEvent += request =>
+            Listener.ConnectionRequestEvent += request =>
             {
-                if (server.ConnectedPeersCount < 10)
+                if (Manager.ConnectedPeersCount < 10)
                     request.AcceptIfKey(NetworkSettings.Header);
                 else
                 {
@@ -72,21 +59,12 @@ namespace SlumWarriorsServer.Networking
                 }
             };
 
-            listener.PeerConnectedEvent += peer =>
+            Listener.PeerConnectedEvent += peer =>
             {
                 Console.WriteLine("We got connection: {0}", peer.Address);
-                
-                var writer = new NetDataWriter();
-
-                Engine.PlayersInitialized++;
-
-                var player = new Player(Engine.PlayersInitialized);
-                player.Peer = peer;
-
-                player.Start();
             };
 
-            listener.NetworkReceiveEvent += (fromPeer, dataReader, deliveryMethod, channel) =>
+            Listener.NetworkReceiveEvent += (fromPeer, dataReader, deliveryMethod, channel) =>
             {
                 var writer = new NetDataWriter();
 
@@ -101,7 +79,7 @@ namespace SlumWarriorsServer.Networking
 
         public static void Poll()
         {
-            server.PollEvents();
+            Manager.PollEvents();
         }
 
         public static void Update(float tickDelta)
@@ -117,7 +95,7 @@ namespace SlumWarriorsServer.Networking
 
         public static void Stop()
         {
-            server.Stop();
+            Manager.Stop();
         }
 
         public static NetReceive? Receive(NetPeer peer, string tag)

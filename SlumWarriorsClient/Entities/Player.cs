@@ -46,6 +46,8 @@ namespace SlumWarriorsClient.Entities
             if (IsKeyPressed(KeyboardKey.A))
                 MovementVec.X = 1f;
 
+            Network.SendMovement(MovementVec);
+
             Camera.Target = Vector2.Lerp(Camera.Target, Position, 3.5f * deltaTime);
         }
 

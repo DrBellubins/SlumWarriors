@@ -61,10 +61,12 @@ namespace SlumWarriorsClient
                 deltaTime = (currentTimer.Ticks - previousTimer.Ticks) / 10000000f;
                 time += deltaTime;
 
-                Network.Update();
+                Network.Poll(); // Must update first
 
                 foreach (var script in Script.Scripts)
                     script.Update(deltaTime);
+
+                Network.Update(deltaTime);
 
                 // Draw
                 Raylib.BeginDrawing();

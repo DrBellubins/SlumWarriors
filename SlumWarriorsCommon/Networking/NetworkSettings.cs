@@ -1,4 +1,4 @@
-﻿namespace SlumWarriorsCommon
+﻿namespace SlumWarriorsCommon.Networking
 {
     public class NetworkSettings
     {

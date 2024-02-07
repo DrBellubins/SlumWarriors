@@ -7,7 +7,7 @@ using System.Numerics;
 
 using LiteNetLib;
 using LiteNetLib.Utils;
-using SlumWarriorsCommon;
+using SlumWarriorsCommon.Networking;
 
 // Connection buffer format:
 // 3 bytes - Header
@@ -27,39 +27,66 @@ namespace SlumWarriorsClient.Networking
         private static EventBasedNetListener listener = new EventBasedNetListener();
         private static NetManager client = new NetManager(listener);
 
+        private static NetPeer? server;
+
+        private static Queue<NetDataWriter> bufferQueue = new Queue<NetDataWriter>();
+
         public static void Start()
         {
             client.Start();
             client.Connect("localhost", NetworkSettings.Port, NetworkSettings.Header);
 
+            listener.PeerConnectedEvent += peer =>
+            {
+                server = peer;
+            };
+
             listener.NetworkReceiveEvent += (fromPeer, dataReader, deliveryMethod, channel) =>
             {
                 var writer = new NetDataWriter();
 
-                var cType = dataReader.GetString(2);
+                var pType = dataReader.GetString(2);
 
-                if (cType == "fc") // First connection
-                {
-                    writer.Put("sr"); // spawnpoint request
-                    fromPeer.Send(writer, DeliveryMethod.ReliableOrdered);
-                }
-                else if (cType == "pu") // Pos Update
-                {
+                if (pType == "pu") // Pos Update
                     Engine.CurrentPlayer.Position = new Vector2(dataReader.GetFloat(), dataReader.GetFloat());
-                }
 
                 dataReader.Recycle();
             };
         }
 
-        public static void Update()
+        public static void Poll()
         {
             client.PollEvents();
+        }
+
+        public static void Update(float deltaTime)
+        {
+            for (int i = 0; i < bufferQueue.Count; i++)
+            {
+                var com = bufferQueue.Dequeue();
+
+                if (server != null)
+                    server.Send(com, DeliveryMethod.ReliableOrdered);
+            }
         }
 
         public static void Stop()
         {
             client.Stop();
+        }
+
+        public static void SendMovement(Vector2 movement)
+        {
+            if (server != null)
+            {
+                var writer = new NetDataWriter();
+
+                writer.Put("mu"); // movement update
+                writer.Put(movement.X);
+                writer.Put(movement.Y);
+
+                bufferQueue.Enqueue(writer);
+            }
         }
     }
 }
