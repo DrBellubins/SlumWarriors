@@ -11,7 +11,7 @@ using System.Numerics;
 
 namespace SlumWarriorsServer.Entities
 {
-    public class Player
+    public class ServerPlayer
     {
         public Vector2 Position;
         public float Rotation;
@@ -22,7 +22,7 @@ namespace SlumWarriorsServer.Entities
 
         private bool hasSpawned = false;
 
-        public Player(int id)
+        public ServerPlayer(int id)
         {
             Engine.Players.Add(id, this);
         }

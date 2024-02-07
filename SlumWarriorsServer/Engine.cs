@@ -17,7 +17,7 @@ namespace SlumWarriorsServer
 
         public static bool IsRunning;
 
-        public static Dictionary<int, Player> Players = new Dictionary<int, Player>();
+        public static Dictionary<int, ServerPlayer> Players = new Dictionary<int, ServerPlayer>();
 
         public static int PlayersInitialized = 0; // The num of players that ever entered the server (save this to file)
 
@@ -32,7 +32,7 @@ namespace SlumWarriorsServer
             {
                 PlayersInitialized++;
 
-                var player = new Player(PlayersInitialized);
+                var player = new ServerPlayer(PlayersInitialized);
                 player.Peer = peer;
 
                 player.Start();
