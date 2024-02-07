@@ -11,6 +11,8 @@ using SlumWarriorsCommon.Networking;
 using SlumWarriorsClient.Entities;
 using SlumWarriorsClient.Utils;
 using LiteNetLib;
+using SlumWarriorsClient.Terrain;
+using SlumWarriorsCommon.Terrain;
 
 // TODO: Figure out how to pass packet data to scripts/entities
 namespace SlumWarriorsClient
@@ -38,7 +40,9 @@ namespace SlumWarriorsClient
             Raylib.SetTargetFPS(MaxFPS);
 
             MainFont = Raylib.LoadFontEx("Assets/Fonts/VarelaRound-Regular.ttf", 64, null, 250);
-            DebugTexture = Raylib.LoadTexture("Assets/Textures/DebugTexture.png");
+            DebugTexture = Raylib.LoadTexture("Assets/Textures/Blocks/error.png");
+
+            Block.InitializeBlockTextures();
 
             var previousTimer = DateTime.Now;
             var currentTimer = DateTime.Now;
@@ -58,6 +62,8 @@ namespace SlumWarriorsClient
             foreach (var script in Script.Scripts)
                 script.Start();
 
+            var world = new World();
+
             while (IsRunning)
             {
                 if (Raylib.IsKeyPressed(KeyboardKey.Q))
@@ -71,6 +77,8 @@ namespace SlumWarriorsClient
 
                 Network.Poll(); // Must update first
 
+                world.Update(deltaTime);
+
                 foreach (var script in Script.Scripts)
                     script.Update(deltaTime);
 
@@ -83,6 +91,8 @@ namespace SlumWarriorsClient
                 Raylib.BeginMode2D(CurrentPlayer.Camera);
 
                 Raylib.DrawTexture(DebugTexture, 0, 0, Color.White);
+
+                world.Draw(deltaTime);
 
                 foreach (var script in Script.Scripts)
                 {

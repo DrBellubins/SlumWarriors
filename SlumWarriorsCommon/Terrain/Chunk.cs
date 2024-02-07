@@ -9,7 +9,7 @@ namespace SlumWarriorsCommon.Terrain
 {
     public class Chunk
     {
-        Vector2 Position;
+        public Vector2 Position;
         public Block[,] Blocks = new Block[16, 16];
     }
 }

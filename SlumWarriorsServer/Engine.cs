@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SlumWarriorsServer.Terrain;
 
 namespace SlumWarriorsServer
 {
@@ -38,6 +39,9 @@ namespace SlumWarriorsServer
                 player.Start();
             };
 
+            var world = new World();
+            world.Start();
+
             foreach (var script in Script.Scripts)
                 script.Start();
 
@@ -47,6 +51,8 @@ namespace SlumWarriorsServer
 
                 // Update
                 Network.Poll(); // Must be updated first
+
+                world.Update(TickDelta);
 
                 foreach (var script in Script.Scripts)
                     script.Update(TickDelta);

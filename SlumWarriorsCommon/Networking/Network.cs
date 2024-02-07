@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using LiteNetLib;
 using LiteNetLib.Utils;
+using SlumWarriorsCommon.Terrain;
 
 namespace SlumWarriorsCommon.Networking
 {
@@ -114,7 +115,6 @@ namespace SlumWarriorsCommon.Networking
                 if (receive.Tag == tag && receive.Peer == peer)
                 {
                     var recTag = receive.Reader.GetString(2); // Must be called to remove tag from buffer!
-                    Console.WriteLine($"Received: {recTag} from: {peer.Address}");
 
                     receiveQueue.Remove(receive);
                     return receive;
@@ -143,6 +143,73 @@ namespace SlumWarriorsCommon.Networking
 
             var com = new NetSend(peer, writer);
             sendQueue.Enqueue(com);
+        }
+
+        public static void SendChunk(NetPeer peer, Chunk chunk, string tag)
+        {
+            var writer = new NetDataWriter();
+            writer.Put(tag);
+            writer.Put(SerializeChunk(chunk));
+
+            var com = new NetSend(peer, writer);
+            sendQueue.Enqueue(com);
+        }
+
+        public static byte[] SerializeChunk(Chunk chunk)
+        {
+            var byteList = new List<byte>();
+
+            byteList.AddRange(BitConverter.GetBytes(chunk.Position.X));
+            byteList.AddRange(BitConverter.GetBytes(chunk.Position.Y));
+
+            for (int x = 0; x < (chunk.Blocks.Length / 16); x++)
+            {
+                for (int y = 0; y < (chunk.Blocks.Length / 16); y++)
+                {
+                    byteList.AddRange(BitConverter.GetBytes(chunk.Blocks[x, y].Layer));
+                    byteList.AddRange(BitConverter.GetBytes((int)chunk.Blocks[x, y].Type));
+                    byteList.AddRange(BitConverter.GetBytes(chunk.Blocks[x, y].Position.X));
+                    byteList.AddRange(BitConverter.GetBytes(chunk.Blocks[x, y].Position.Y));
+                }
+            }
+
+            Console.WriteLine($"chunk size: {byteList.Count} bytes");
+
+            return byteList.ToArray();
+        }
+
+        public static Chunk DeserializeChunk(byte[] chunkBytes)
+        {
+            var chunk = new Chunk();
+            var index = 0;
+
+            var posX = BitConverter.ToSingle(chunkBytes, index);
+            index += sizeof(float);
+
+            var posY = BitConverter.ToSingle(chunkBytes, index);
+            index += sizeof(float);
+
+            chunk.Position = new Vector2(posX, posY);
+
+            for (int x = 0; x < (chunk.Blocks.Length / 16); x++)
+            {
+                for (int y = 0; y < (chunk.Blocks.Length / 16); y++)
+                {
+                    chunk.Blocks[x, y].Layer = BitConverter.ToInt32(chunkBytes, index);
+                    index += sizeof(int);
+                    chunk.Blocks[x, y].Type = (BlockType)BitConverter.ToInt32(chunkBytes, index);
+                    index += sizeof(int);
+
+                    var bPosX = BitConverter.ToSingle(chunkBytes, index);
+                    index += sizeof(float);
+                    var bPosY = BitConverter.ToSingle(chunkBytes, index);
+                    index += sizeof(float);
+
+                    chunk.Blocks[x, y].Position = new Vector2(bPosX, bPosY);
+                }
+            }
+
+            return chunk;
         }
     }
 }

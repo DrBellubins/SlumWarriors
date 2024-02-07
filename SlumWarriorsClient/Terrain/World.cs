@@ -1,0 +1,54 @@
+﻿using SlumWarriorsCommon.Networking;
+using SlumWarriorsCommon.Terrain;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
+using System.Text;
+using System.Threading.Tasks;
+using Raylib_cs;
+
+using static Raylib_cs.Raylib;
+
+namespace SlumWarriorsClient.Terrain
+{
+    public class World
+    {
+        public List<Chunk> Chunks = new List<Chunk>();
+
+        public void Update(float deltaTime)
+        {
+            if (Engine.Server != null)
+            {
+                var rec = Network.Receive(Engine.Server, "wu"); // world update
+
+                if (rec != null)
+                {
+                    var cBytes = rec.Reader.GetBytesWithLength();
+                    Chunks.Add(Network.DeserializeChunk(cBytes));
+                }
+            }
+        }
+
+        public void Draw(float deltaTime)
+        {
+            foreach (var chunk in Chunks)
+            {
+                for (int x = 0; x < (chunk.Blocks.Length / 16); x++)
+                {
+                    for (int y = 0; y < (chunk.Blocks.Length / 16); y++)
+                    {
+                        var block = chunk.Blocks[x, y];
+
+                        var origTextureRect = new Rectangle(0f, 0f, 8f, 8f);
+                        var newTextureRect = new Rectangle(block.Position.X,
+                                block.Position.Y, 1f, 1f);
+
+                        DrawTexturePro(Block.Textures[block.Type],
+                                                origTextureRect, newTextureRect, Vector2.Zero, 0f, Color.White);
+                    }
+                }
+            }
+        }
+    }
+}
