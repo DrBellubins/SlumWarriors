@@ -162,9 +162,9 @@ namespace SlumWarriorsCommon.Networking
             byteList.AddRange(BitConverter.GetBytes(chunk.Position.X));
             byteList.AddRange(BitConverter.GetBytes(chunk.Position.Y));
 
-            for (int x = 0; x < (chunk.Blocks.Length / 16); x++)
+            for (int x = 0; x < chunk.Blocks.GetLength(0); x++)
             {
-                for (int y = 0; y < (chunk.Blocks.Length / 16); y++)
+                for (int y = 0; y < chunk.Blocks.GetLength(1); y++)
                 {
                     byteList.AddRange(BitConverter.GetBytes(chunk.Blocks[x, y].Layer));
                     byteList.AddRange(BitConverter.GetBytes((int)chunk.Blocks[x, y].Type));
@@ -173,7 +173,7 @@ namespace SlumWarriorsCommon.Networking
                 }
             }
 
-            Console.WriteLine($"chunk size: {byteList.Count} bytes");
+            Console.WriteLine($"serialize chunk size: {byteList.Count} bytes");
 
             return byteList.ToArray();
         }
@@ -181,7 +181,7 @@ namespace SlumWarriorsCommon.Networking
         public static Chunk DeserializeChunk(byte[] chunkBytes)
         {
             var chunk = new Chunk();
-            var index = 0;
+            var index = 4; // Skip header
 
             var posX = BitConverter.ToSingle(chunkBytes, index);
             index += sizeof(float);
@@ -191,21 +191,29 @@ namespace SlumWarriorsCommon.Networking
 
             chunk.Position = new Vector2(posX, posY);
 
-            for (int x = 0; x < (chunk.Blocks.Length / 16); x++)
+            Console.WriteLine($"deserialize chunk size: {chunkBytes.Length} bytes");
+
+            for (int x = 0; x < chunk.Blocks.GetLength(0); x++)
             {
-                for (int y = 0; y < (chunk.Blocks.Length / 16); y++)
+                for (int y = 0; y < chunk.Blocks.GetLength(1); y++)
                 {
-                    chunk.Blocks[x, y].Layer = BitConverter.ToInt32(chunkBytes, index);
+                    var block = new Block();
+
+                    block.Layer = BitConverter.ToInt32(chunkBytes, index);
                     index += sizeof(int);
-                    chunk.Blocks[x, y].Type = (BlockType)BitConverter.ToInt32(chunkBytes, index);
+
+                    block.Type = (BlockType)BitConverter.ToInt32(chunkBytes, index);
                     index += sizeof(int);
 
                     var bPosX = BitConverter.ToSingle(chunkBytes, index);
                     index += sizeof(float);
+
                     var bPosY = BitConverter.ToSingle(chunkBytes, index);
                     index += sizeof(float);
 
-                    chunk.Blocks[x, y].Position = new Vector2(bPosX, bPosY);
+                    block.Position = new Vector2(bPosX, bPosY);
+
+                    chunk.Blocks[x, y] = block;
                 }
             }
 

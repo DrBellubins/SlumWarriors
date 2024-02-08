@@ -24,8 +24,7 @@ namespace SlumWarriorsClient.Terrain
 
                 if (rec != null)
                 {
-                    var cBytes = rec.Reader.GetBytesWithLength();
-                    Chunks.Add(Network.DeserializeChunk(cBytes));
+                    Chunks.Add(Network.DeserializeChunk(rec.Reader.RawData));
                 }
             }
         }
@@ -34,9 +33,9 @@ namespace SlumWarriorsClient.Terrain
         {
             foreach (var chunk in Chunks)
             {
-                for (int x = 0; x < (chunk.Blocks.Length / 16); x++)
+                for (int x = 0; x < chunk.Blocks.GetLength(0); x++)
                 {
-                    for (int y = 0; y < (chunk.Blocks.Length / 16); y++)
+                    for (int y = 0; y < chunk.Blocks.GetLength(1); y++)
                     {
                         var block = chunk.Blocks[x, y];
 

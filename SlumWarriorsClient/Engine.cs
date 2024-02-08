@@ -90,8 +90,6 @@ namespace SlumWarriorsClient
 
                 Raylib.BeginMode2D(CurrentPlayer.Camera);
 
-                Raylib.DrawTexture(DebugTexture, 0, 0, Color.White);
-
                 world.Draw(deltaTime);
 
                 foreach (var script in Script.Scripts)

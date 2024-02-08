@@ -15,14 +15,25 @@ namespace SlumWarriorsServer.Terrain
 
         public void Start()
         {
-            for (int x = 0; x < (testChunk.Blocks.Length / 16); x++)
+            var pingPong = false;
+
+            for (int x = 0; x < testChunk.Blocks.GetLength(0); x++)
             {
-                for (int y = 0; y < (testChunk.Blocks.Length / 16); y++)
+                for (int y = 0; y < testChunk.Blocks.GetLength(1); y++)
                 {
+                    pingPong = !pingPong;
+
                     var block = new Block();
                     block.Layer = 0;
-                    block.Type = BlockType.Grass;
+
+                    if (pingPong)
+                        block.Type = BlockType.Grass;
+                    else
+                        block.Type = BlockType.Dirt;
+
                     block.Position = new Vector2(x, y);
+
+                    testChunk.Blocks[x, y] = block;
                 }
             }
         }
