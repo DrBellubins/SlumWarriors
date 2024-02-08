@@ -159,15 +159,15 @@ namespace SlumWarriorsCommon.Networking
         {
             var byteList = new List<byte>();
 
-            byteList.AddRange(BitConverter.GetBytes(chunk.Position.X));
-            byteList.AddRange(BitConverter.GetBytes(chunk.Position.Y));
+            byteList.AddRange(BitConverter.GetBytes(chunk.Info.Position.X));
+            byteList.AddRange(BitConverter.GetBytes(chunk.Info.Position.Y));
 
             for (int x = 0; x < chunk.Blocks.GetLength(0); x++)
             {
                 for (int y = 0; y < chunk.Blocks.GetLength(1); y++)
                 {
                     byteList.AddRange(BitConverter.GetBytes(chunk.Blocks[x, y].Layer));
-                    byteList.AddRange(BitConverter.GetBytes((int)chunk.Blocks[x, y].Type));
+                    byteList.AddRange(BitConverter.GetBytes((int)chunk.Blocks[x, y].Info.Type));
                     byteList.AddRange(BitConverter.GetBytes(chunk.Blocks[x, y].Position.X));
                     byteList.AddRange(BitConverter.GetBytes(chunk.Blocks[x, y].Position.Y));
                 }
@@ -189,7 +189,7 @@ namespace SlumWarriorsCommon.Networking
             var posY = BitConverter.ToSingle(chunkBytes, index);
             index += sizeof(float);
 
-            chunk.Position = new Vector2(posX, posY);
+            chunk.Info.Position = new Vector2(posX, posY);
 
             Console.WriteLine($"deserialize chunk size: {chunkBytes.Length} bytes");
 
@@ -202,7 +202,7 @@ namespace SlumWarriorsCommon.Networking
                     block.Layer = BitConverter.ToInt32(chunkBytes, index);
                     index += sizeof(int);
 
-                    block.Type = (BlockType)BitConverter.ToInt32(chunkBytes, index);
+                    block.Info.Type = (BlockType)BitConverter.ToInt32(chunkBytes, index);
                     index += sizeof(int);
 
                     var bPosX = BitConverter.ToSingle(chunkBytes, index);

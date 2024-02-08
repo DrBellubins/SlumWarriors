@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SlumWarriorsServer.Terrain;
+using SlumWarriorsCommon.Terrain;
 
 namespace SlumWarriorsServer
 {
@@ -25,6 +26,8 @@ namespace SlumWarriorsServer
         public void Initialize()
         {
             IsRunning = true;
+
+            Block.InitializeBlockPrefabs(true);
 
             // Start
             Network.Start(true);
@@ -58,7 +61,7 @@ namespace SlumWarriorsServer
                     script.Update(TickDelta);
 
                 foreach (var player in Players.Values)
-                    player.Update(TickDelta);
+                    player.Update(TickDelta, world.CollisionCheck);
 
                 Network.Update();
             }

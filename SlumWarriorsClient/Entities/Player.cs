@@ -29,7 +29,8 @@ namespace SlumWarriorsClient.Entities
             Camera = new Camera2D();
             Camera.Target = new Vector2(Position.X, Position.Y);
             Camera.Offset = new Vector2(UI.CenterPivot.X, UI.CenterPivot.Y);
-            Camera.Rotation = 180.0f; // Flip camera so that north is +Y
+            //Camera.Rotation = 180.0f; // Flip camera so that north is +Y
+            Camera.Rotation = 0f;
             Camera.Zoom = 100.0f;
         }
 
@@ -51,16 +52,16 @@ namespace SlumWarriorsClient.Entities
 
             // Update movement
             if (IsKeyPressed(KeyboardKey.W))
-                MovementVec.Y = 1f;
-
-            if (IsKeyPressed(KeyboardKey.S))
                 MovementVec.Y = -1f;
 
+            if (IsKeyPressed(KeyboardKey.S))
+                MovementVec.Y = 1f;
+
             if (IsKeyPressed(KeyboardKey.D))
-                MovementVec.X = -1f;
+                MovementVec.X = 1f;
 
             if (IsKeyPressed(KeyboardKey.A))
-                MovementVec.X = 1f;
+                MovementVec.X = -1f;
 
             // Send movement
             if (isMoving && Engine.Server != null)

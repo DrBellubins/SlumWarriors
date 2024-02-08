@@ -43,7 +43,7 @@ namespace SlumWarriorsClient.Terrain
                         var newTextureRect = new Rectangle(block.Position.X,
                                 block.Position.Y, 1f, 1f);
 
-                        DrawTexturePro(Block.Textures[block.Type],
+                        DrawTexturePro(Block.Textures[block.Info.Type],
                                                 origTextureRect, newTextureRect, Vector2.Zero, 0f, Color.White);
                     }
                 }

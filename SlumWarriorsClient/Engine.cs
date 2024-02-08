@@ -42,7 +42,7 @@ namespace SlumWarriorsClient
             MainFont = Raylib.LoadFontEx("Assets/Fonts/VarelaRound-Regular.ttf", 64, null, 250);
             DebugTexture = Raylib.LoadTexture("Assets/Textures/Blocks/error.png");
 
-            Block.InitializeBlockTextures();
+            Block.InitializeBlockPrefabs(false);
 
             var previousTimer = DateTime.Now;
             var currentTimer = DateTime.Now;

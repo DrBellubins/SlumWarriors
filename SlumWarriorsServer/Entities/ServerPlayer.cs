@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Numerics;
+using SlumWarriorsCommon.Terrain;
 
 namespace SlumWarriorsServer.Entities
 {
@@ -42,7 +43,7 @@ namespace SlumWarriorsServer.Entities
         }
 
         // Runs every tick
-        public void Update(float deltaTime)
+        public void Update(float deltaTime, Block[,] collCheck)
         {
             if (hasSpawned)
             {
