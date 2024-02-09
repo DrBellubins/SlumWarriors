@@ -6,21 +6,26 @@ using System.Text;
 using System.Numerics;
 using System.Threading.Tasks;
 using SlumWarriorsCommon.Networking;
+using Raylib_cs;
 
 namespace SlumWarriorsServer.Terrain
 {
     public class World
     {
-        public Block[,] CollisionCheck = new Block[4, 4];
+        public Block BlockAheadPlayer = new Block();
 
+        private Chunk[,] renderedChunks = new Chunk[8, 8];
+
+        private int sqrtRenderDistance;
         private FastNoiseLite noise = new FastNoiseLite();
-
-        private Chunk testChunk = new Chunk();
 
         public void Start()
         {
+            sqrtRenderDistance = (int)MathF.Sqrt(renderedChunks.Length);
+
             noise.SetSeed(999);
-            testChunk = generateChunk(Vector2.Zero); // Offset chunks to make world coords whole numbers
+
+            generateAllChunks();
         }
 
         bool sent = false;
@@ -39,10 +44,74 @@ namespace SlumWarriorsServer.Terrain
 
             foreach (var player in Engine.Players.Values)
             {
-                if (player != null && player.Peer != null && !sent)
+                if (player != null)
                 {
-                    Network.SendChunk(player.Peer, testChunk, "wu"); // world update
-                    sent = true;
+                    //player.CollisionCheck[0] = GetBlockAtPos(player.Position + Vector2.UnitX); // right
+                    //player.CollisionCheck[1] = GetBlockAtPos(player.Position + -Vector2.UnitX); // left
+                    //player.CollisionCheck[2] = GetBlockAtPos(player.Position + Vector2.UnitY); // down
+                    //player.CollisionCheck[3] = GetBlockAtPos(player.Position + -Vector2.UnitY); // up
+
+                    var bAhead = GetBlockAtPos(player.Position + player.MovementVec);
+
+                    if (bAhead != null)
+                    {
+                        //Console.WriteLine($"bblock: {bAhead.Position}");
+                        player.BlockAhead = bAhead;
+                    }
+
+                    if (player.Peer != null && !sent)
+                    {
+                        for (int cx = 0; cx < sqrtRenderDistance; cx++)
+                        {
+                            for (int cy = 0; cy < sqrtRenderDistance; cy++)
+                            {
+                                Network.SendChunk(player.Peer, renderedChunks[cx, cy], "wu");
+                            }
+                        }
+
+                        sent = true; // TODO: not executed per-player
+                    }
+                }
+            }
+        }
+
+        public void Draw(float tickDelta)
+        {
+            for (int cx = 0; cx < sqrtRenderDistance; cx++)
+            {
+                for (int cy = 0; cy < sqrtRenderDistance; cy++)
+                {
+                    for (int x = 0; x < 16; x++)
+                    {
+                        for (int y = 0; y < 16; y++)
+                        {
+                            var block = renderedChunks[cx, cy].Blocks[x, y];
+
+                            var blockRect = new Rectangle(block.Position.X,
+                                    block.Position.Y, 1f, 1f);
+
+                            Raylib.DrawRectangleLinesEx(blockRect, 0.1f, Block.Colors[block.Info.Type]);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void generateAllChunks()
+        {
+            for (int cx = 0; cx < sqrtRenderDistance; cx++)
+            {
+                for (int cy = 0; cy < sqrtRenderDistance; cy++)
+                {
+                    // We start at nearest chunk pos to player, 
+                    // multiply current chunk pos by num of
+                    // blocks in chunk (32), then offset by
+                    // sqrtRenderDistance multiplied by half
+                    // num of blocks in chunk
+                    var chunkPos = new Vector2((cx * 16) - (sqrtRenderDistance * 8),
+                        (cy * 16) - (sqrtRenderDistance * 8));
+
+                    renderedChunks[cx, cy] = generateChunk(chunkPos);
                 }
             }
         }
@@ -154,6 +223,34 @@ namespace SlumWarriorsServer.Terrain
             }
 
             return chunk;
+        }
+
+        // TODO: Doesn't return a block
+        private Block? GetBlockAtPos(Vector2 pos)
+        {
+            for (int cx = 0; cx < sqrtRenderDistance; cx++)
+            {
+                for (int cy = 0; cy < sqrtRenderDistance; cy++)
+                {
+                    if (renderedChunks[cx, cy] != null)
+                    {
+                        var currentChunk = renderedChunks[cx, cy];
+
+                        for (int x = 0; x < 16; x++)
+                        {
+                            for (int y = 0; y < 16; y++)
+                            {
+                                var curBlock = currentChunk.Blocks[x, y];
+
+                                if ((curBlock.Position.X == (pos.X - 0.5f)) && (curBlock.Position.Y == (pos.Y - 0.5f)))
+                                    return curBlock;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return null;
         }
     }
 }

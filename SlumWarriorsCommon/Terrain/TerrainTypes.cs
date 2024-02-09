@@ -86,6 +86,8 @@ namespace SlumWarriorsCommon.Terrain
         public static Dictionary<BlockType, Texture2D> Textures = new Dictionary<BlockType, Texture2D>();
         public static Dictionary<BlockType, BlockSounds> Sounds = new Dictionary<BlockType, BlockSounds>();
 
+        public static Dictionary<BlockType, Color> Colors = new Dictionary<BlockType, Color>();
+
         public int Layer;
         public Vector2 Position;
         public BlockInfo Info;
@@ -141,11 +143,39 @@ namespace SlumWarriorsCommon.Terrain
                     Sounds.Add((BlockType)i, blockSounds);
                 }
             }
+            else
+            {
+                var blockTypeCount = Enum.GetNames(typeof(BlockType)).Length;
+
+                for (int i = 0; i < blockTypeCount; i++)
+                    Colors.Add((BlockType)i, loadBlockColor((BlockType)i));
+            }
         }
 
         private static Texture2D loadBlockTexture(BlockType blockType)
         {
             return Raylib.LoadTexture($"Assets/Textures/Blocks/{blockType}.png");
+        }
+
+        private static Color loadBlockColor(BlockType blockType)
+        {
+            switch (blockType)
+            {
+                case BlockType.Grass:
+                    return Color.Green;
+                case BlockType.Stone:
+                    return Color.Gray;
+                case BlockType.Dirt:
+                    return Color.Brown;
+                case BlockType.Sand:
+                    return Color.Beige;
+                case BlockType.Water:
+                    return Color.Blue;
+                case BlockType.Snow:
+                    return Color.White;
+                default:
+                    return Color.Pink;
+            }
         }
 
         private static Sound loadBlockSounds(BlockType blockType, int index)
