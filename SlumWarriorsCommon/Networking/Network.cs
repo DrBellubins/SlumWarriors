@@ -124,12 +124,11 @@ namespace SlumWarriorsCommon.Networking
             return null;
         }
 
-        public static void SendVector2(NetPeer peer, Vector2 vec, string tag)
+        public static void SendInt(NetPeer peer, int integer, string tag)
         {
             var writer = new NetDataWriter();
             writer.Put(tag);
-            writer.Put(vec.X);
-            writer.Put(vec.Y);
+            writer.Put(integer);
 
             var com = new NetSend(peer, writer);
             sendQueue.Enqueue(com);
@@ -140,6 +139,17 @@ namespace SlumWarriorsCommon.Networking
             var writer = new NetDataWriter();
             writer.Put(tag);
             writer.Put(single);
+
+            var com = new NetSend(peer, writer);
+            sendQueue.Enqueue(com);
+        }
+
+        public static void SendVector2(NetPeer peer, Vector2 vec, string tag)
+        {
+            var writer = new NetDataWriter();
+            writer.Put(tag);
+            writer.Put(vec.X);
+            writer.Put(vec.Y);
 
             var com = new NetSend(peer, writer);
             sendQueue.Enqueue(com);

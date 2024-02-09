@@ -11,6 +11,7 @@ using System.Numerics;
 using SlumWarriorsCommon.Terrain;
 
 using Raylib_cs;
+using SlumWarriorsCommon.Gameplay;
 
 namespace SlumWarriorsServer.Entities
 {
@@ -20,11 +21,12 @@ namespace SlumWarriorsServer.Entities
         public float Rotation;
 
         public Vector2 MovementVec;
-        //public Block?[] CollisionCheck = new Block?[4];
+        public Block?[] CollisionCheck = new Block?[4];
         public Block? BlockAhead;
 
         public NetPeer? Peer;
 
+        private Vector2 lastPosition;
         private bool hasSpawned = false;
 
         public Player(int id)
@@ -57,28 +59,57 @@ namespace SlumWarriorsServer.Entities
 
                     if (rec != null && rec.Reader != null) // received mu
                     {
-                        MovementVec = Vector2.Normalize(new Vector2(rec.Reader.GetFloat(), rec.Reader.GetFloat()));
+                        lastPosition = Position;
 
-                        if (BlockAhead != null && BlockAhead.Layer != 1)
-                            Position += MovementVec;
+                        var movement = (MoveDirection)rec.Reader.GetInt();
 
-                        /*var colMoveVec = Vector2.Zero;
+                        switch (movement)
+                        {
+                            case MoveDirection.Up:
+                                MovementVec = -Vector2.UnitY;
+                                break;
+                            case MoveDirection.Down:
+                                MovementVec = Vector2.UnitY;
+                                break;
+                            case MoveDirection.Left:
+                                MovementVec = -Vector2.UnitX;
+                                break;
+                            case MoveDirection.Right:
+                                MovementVec = Vector2.UnitX;
+                                break;
+                        }
 
-                        for (int i = 0; i < 4; i++)
+                        Position.X += MovementVec.X;
+
+                        for (int i = 0; i < 2; i++)
                         {
                             var block = CollisionCheck[i];
 
-                            if (block != null && block.Layer != 1)
+                            if (block != null && block.Layer == 1)
                             {
-                                colMoveVec = MovementVec;
+                                var isCollidingX = Position.X == (block.Position.X + 0.5f);
+
+                                if (isCollidingX)
+                                    Position.X = lastPosition.X;
                             }
                         }
 
-                        Position += colMoveVec;*/
+                        Position.Y += MovementVec.Y;
+
+                        for (int i = 2; i < 4; i++)
+                        {
+                            var block = CollisionCheck[i];
+
+                            if (block != null && block.Layer == 1)
+                            {
+                                var isCollidingY = Position.Y == (block.Position.Y + 0.5f);
+
+                                if (isCollidingY)
+                                    Position.Y = lastPosition.Y;
+                            }
+                        }
 
                         Network.SendVector2(Peer, Position, "pu");
-
-                        //MovementVec = Vector2.Zero;
                     }
                 }
             }
@@ -91,13 +122,13 @@ namespace SlumWarriorsServer.Entities
             if (BlockAhead != null)
                 Raylib.DrawCircleV(BlockAhead.Position + new Vector2(0.5f, 0.5f), 0.5f, Color.Blue);
 
-            /*for (int i = 0; i < CollisionCheck.Length; i++)
+            for (int i = 0; i < CollisionCheck.Length; i++)
             {
                 var block = CollisionCheck[i];
 
                 if (block != null)
                     Raylib.DrawCircleV(block.Position + new Vector2(0.5f, 0.5f), 0.5f, Color.Blue);
-            }*/
+            }
         }
     }
 }

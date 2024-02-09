@@ -11,6 +11,7 @@ using Raylib_cs;
 using SlumWarriorsClient.Utils;
 
 using static Raylib_cs.Raylib;
+using SlumWarriorsCommon.Gameplay;
 
 namespace SlumWarriorsClient.Entities
 {
@@ -22,6 +23,7 @@ namespace SlumWarriorsClient.Entities
         public Camera2D Camera;
         public float CameraZoom;
 
+        MoveDirection movement = new MoveDirection();
         private bool isMoving = false;
 
         public override void Start()
@@ -52,22 +54,22 @@ namespace SlumWarriorsClient.Entities
 
             // Update movement
             if (IsKeyPressed(KeyboardKey.W))
-                MovementVec.Y = -1f;
+                movement = MoveDirection.Up;
 
             if (IsKeyPressed(KeyboardKey.S))
-                MovementVec.Y = 1f;
+                movement = MoveDirection.Down;
 
             if (IsKeyPressed(KeyboardKey.D))
-                MovementVec.X = 1f;
+                movement = MoveDirection.Right;
 
             if (IsKeyPressed(KeyboardKey.A))
-                MovementVec.X = -1f;
+                movement = MoveDirection.Left;
 
             // Send movement
             if (isMoving && Engine.Server != null)
             {
-                Network.SendVector2(Engine.Server, MovementVec, "mu");
-                MovementVec = Vector2.Zero;
+                Network.SendInt(Engine.Server, (int)movement, "mu");
+                movement = MoveDirection.NONE;
             }
 
             Camera.Target = Vector2.Lerp(Camera.Target, Position, 3.5f * deltaTime);

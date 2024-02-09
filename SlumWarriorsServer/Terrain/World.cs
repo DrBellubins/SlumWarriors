@@ -46,18 +46,18 @@ namespace SlumWarriorsServer.Terrain
             {
                 if (player != null)
                 {
-                    //player.CollisionCheck[0] = GetBlockAtPos(player.Position + Vector2.UnitX); // right
-                    //player.CollisionCheck[1] = GetBlockAtPos(player.Position + -Vector2.UnitX); // left
-                    //player.CollisionCheck[2] = GetBlockAtPos(player.Position + Vector2.UnitY); // down
-                    //player.CollisionCheck[3] = GetBlockAtPos(player.Position + -Vector2.UnitY); // up
+                    player.CollisionCheck[0] = GetBlockAtPos(player.Position + Vector2.UnitX); // right
+                    player.CollisionCheck[1] = GetBlockAtPos(player.Position + -Vector2.UnitX); // left
+                    player.CollisionCheck[2] = GetBlockAtPos(player.Position + Vector2.UnitY); // down
+                    player.CollisionCheck[3] = GetBlockAtPos(player.Position + -Vector2.UnitY); // up
 
-                    var bAhead = GetBlockAtPos(player.Position + player.MovementVec);
+                    /*var bAhead = GetBlockAtPos(player.Position + player.MovementVec);
 
                     if (bAhead != null)
                     {
                         //Console.WriteLine($"bblock: {bAhead.Position}");
                         player.BlockAhead = bAhead;
-                    }
+                    }*/
 
                     if (player.Peer != null && !sent)
                     {
