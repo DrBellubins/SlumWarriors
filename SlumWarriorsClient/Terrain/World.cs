@@ -12,6 +12,7 @@ using static Raylib_cs.Raylib;
 
 namespace SlumWarriorsClient.Terrain
 {
+    // TODO: Separate Block class on client to a lighterweight ClientBlock
     public class World
     {
         public List<Chunk> Chunks = new List<Chunk>();

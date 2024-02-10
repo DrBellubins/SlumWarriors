@@ -88,7 +88,7 @@ namespace SlumWarriorsCommon.Terrain
 
         public static Dictionary<BlockType, Color> Colors = new Dictionary<BlockType, Color>();
 
-        public int Layer;
+        public int Layer; // TODO: Set to byte and send over network (for lighting)
         public Vector2 Position;
         public BlockInfo Info;
         public ChunkInfo ChunkInfo;

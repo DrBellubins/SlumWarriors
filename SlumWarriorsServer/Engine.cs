@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using SlumWarriorsServer.Terrain;
 using SlumWarriorsCommon.Terrain;
 using Raylib_cs;
+using SlumWarriorsCommon.Utils;
 
 namespace SlumWarriorsServer
 {
@@ -43,7 +44,11 @@ namespace SlumWarriorsServer
             Block.InitializeBlockPrefabs(true);
 
             // Start
+            GameMath.InitXorRNG();
             Network.Start(true);
+
+            var world = new World();
+            world.Start();
 
             Network.Listener.PeerConnectedEvent += peer =>
             {
@@ -52,11 +57,9 @@ namespace SlumWarriorsServer
                 var player = new Player(PlayersInitialized);
                 player.Peer = peer;
 
-                player.Start();
+                var spawnPos = Task.Run(() => world.GetSpawnPos());
+                player.Start(spawnPos.Result);
             };
-
-            var world = new World();
-            world.Start();
 
             foreach (var script in Script.Scripts)
                 script.Start();
@@ -69,8 +72,6 @@ namespace SlumWarriorsServer
 
                 // Update
                 Network.Poll(); // Must be updated first
-
-                
 
                 foreach (var script in Script.Scripts)
                     script.Update(TickDelta);

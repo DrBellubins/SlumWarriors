@@ -35,14 +35,12 @@ namespace SlumWarriorsServer.Entities
         }
 
         // Runs on connection
-        public void Start()
+        public void Start(Vector2 spawnPos)
         {
             if (Peer != null)
             {
-                var spawnPos = new Vector2(10f, 10f);
-                Network.SendVector2(Peer, spawnPos, "pu");
-
                 Position = spawnPos;
+                Network.SendVector2(Peer, Position, "pu");
             }
 
             hasSpawned = true;

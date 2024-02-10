@@ -7,6 +7,7 @@ using System.Numerics;
 using System.Threading.Tasks;
 using SlumWarriorsCommon.Networking;
 using Raylib_cs;
+using SlumWarriorsCommon.Utils;
 
 namespace SlumWarriorsServer.Terrain
 {
@@ -23,7 +24,7 @@ namespace SlumWarriorsServer.Terrain
         {
             sqrtRenderDistance = (int)MathF.Sqrt(renderedChunks.Length);
 
-            noise.SetSeed(999);
+            noise.SetSeed(new Random().Next(int.MinValue, int.MaxValue));
 
             generateAllChunks();
         }
@@ -32,16 +33,6 @@ namespace SlumWarriorsServer.Terrain
 
         public void Update(float tickDelta)
         {
-            // Collision check
-            /*for (int x = 0; x < 4; x++)
-            {
-                for (int y = 0; y < 4; y++)
-                {
-                    CollisionCheck[x, y] = GetBlockAtPos(GetNearestBlockCoord(playerPos
-                        + new Vector2(x - 1.5f, y - 1.5f)));
-                }
-            }*/
-
             foreach (var player in Engine.Players.Values)
             {
                 if (player != null)
@@ -50,14 +41,6 @@ namespace SlumWarriorsServer.Terrain
                     player.CollisionCheck[1] = GetBlockAtPos(player.Position + -Vector2.UnitX); // left
                     player.CollisionCheck[2] = GetBlockAtPos(player.Position + Vector2.UnitY); // down
                     player.CollisionCheck[3] = GetBlockAtPos(player.Position + -Vector2.UnitY); // up
-
-                    /*var bAhead = GetBlockAtPos(player.Position + player.MovementVec);
-
-                    if (bAhead != null)
-                    {
-                        //Console.WriteLine($"bblock: {bAhead.Position}");
-                        player.BlockAhead = bAhead;
-                    }*/
 
                     if (player.Peer != null && !sent)
                     {
@@ -225,7 +208,30 @@ namespace SlumWarriorsServer.Terrain
             return chunk;
         }
 
-        // TODO: Doesn't return a block
+        public async Task<Vector2> GetSpawnPos()
+        {
+            var rndVec = Vector2.Zero;
+            Block? blockCheck = null;
+
+            while (blockCheck == null) // Potentially very slow
+            {
+                await Task.Delay(25);
+
+                var rndX = GameMath.GetXorFloat(-(renderedChunks.Length / 2), renderedChunks.Length / 2);
+                var rndY = GameMath.GetXorFloat(-(renderedChunks.Length / 2), renderedChunks.Length / 2);
+
+                rndVec = GameMath.GetNearestBlockCoord(new Vector2(rndX, rndY)) + new Vector2(0.5f, 0.5f);
+
+                blockCheck = GetBlockAtPos(rndVec);
+
+                // TODO: Could spawn players out of ounds
+                if (blockCheck != null && blockCheck.Layer == 1)
+                    blockCheck = null;
+            }
+
+            return rndVec;
+        }
+
         private Block? GetBlockAtPos(Vector2 pos)
         {
             for (int cx = 0; cx < sqrtRenderDistance; cx++)
