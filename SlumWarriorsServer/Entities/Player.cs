@@ -20,14 +20,15 @@ namespace SlumWarriorsServer.Entities
         public Vector2 Position;
         public float Rotation;
 
+        public bool HasSpawned = false;
         public Vector2 MovementVec;
+        
         public Block?[] CollisionCheck = new Block?[4];
         public Block? BlockAhead;
 
         public NetPeer? Peer;
 
         private Vector2 lastPosition;
-        private bool hasSpawned = false;
 
         public Player(int id)
         {
@@ -43,13 +44,13 @@ namespace SlumWarriorsServer.Entities
                 Network.SendVector2(Peer, Position, "pu");
             }
 
-            hasSpawned = true;
+            HasSpawned = true;
         }
 
         // Runs every tick
         public void Update(float deltaTime)
         {
-            if (hasSpawned)
+            if (HasSpawned)
             {
                 if (Peer != null)
                 {

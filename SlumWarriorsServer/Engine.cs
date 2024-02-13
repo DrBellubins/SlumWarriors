@@ -10,6 +10,8 @@ using SlumWarriorsServer.Terrain;
 using SlumWarriorsCommon.Terrain;
 using Raylib_cs;
 using SlumWarriorsCommon.Utils;
+using System.Numerics;
+using SlumWarriorsServer.Utils;
 
 namespace SlumWarriorsServer
 {
@@ -17,7 +19,8 @@ namespace SlumWarriorsServer
     {
         public const int TickRate = 60;
         public const int TickDelay = (int)((1f / TickRate) * 1000f);
-        public const float TickDelta = 1.0f / TickRate;
+        //public const float TickDelta = 1.0f / TickRate;
+        public const bool DrawDebugWindow = false;
 
         public static bool IsRunning;
 
@@ -36,12 +39,21 @@ namespace SlumWarriorsServer
             IsRunning = true;
 
             // Debug window stuff
-            Raylib.InitWindow(ScreenWidth, ScreenHeight, "Slum Warriors Server Debug");
-            Raylib.SetExitKey(KeyboardKey.Null);
-            Raylib.SetTargetFPS(60);
-            MainFont = Raylib.LoadFontEx("Assets/Fonts/VarelaRound-Regular.ttf", 64, null, 250);
+            if (DrawDebugWindow)
+            {
+                Raylib.InitWindow(ScreenWidth, ScreenHeight, "Slum Warriors Server Debug");
+                Raylib.SetExitKey(KeyboardKey.Null);
+                Raylib.SetTargetFPS(60);
+                MainFont = Raylib.LoadFontEx("Assets/Fonts/VarelaRound-Regular.ttf", 64, null, 250);
+            }
 
             Block.InitializeBlockPrefabs(true);
+
+            var previousTimer = DateTime.Now;
+            var currentTimer = DateTime.Now;
+
+            var time = 0.0f;
+            var deltaTime = 0.0f;
 
             // Start
             GameMath.InitXorRNG();
@@ -69,35 +81,47 @@ namespace SlumWarriorsServer
             while (IsRunning)
             {
                 Thread.Sleep(TickDelay);
+                currentTimer = DateTime.Now;
 
                 // Update
+                deltaTime = (currentTimer.Ticks - previousTimer.Ticks) / 10000000f;
+                time += deltaTime;
+
                 Network.Poll(); // Must be updated first
 
                 foreach (var script in Script.Scripts)
-                    script.Update(TickDelta);
+                    script.Update(deltaTime);
 
                 foreach (var player in Players.Values)
-                    player.Update(TickDelta);
+                    player.Update(deltaTime);
 
-                world.Update(TickDelta);
+                world.Update(deltaTime);
 
                 Network.Update();
 
-                DebugCamera.Update(TickDelta);
+                DebugCamera.Update(deltaTime);
 
                 // Draw debug window
-                Raylib.BeginDrawing();
-                Raylib.ClearBackground(Color.Black);
+                if (DrawDebugWindow)
+                {
+                    Raylib.BeginDrawing();
+                    Raylib.ClearBackground(Color.Black);
 
-                Raylib.BeginMode2D(DebugCamera.Camera);
+                    Raylib.BeginMode2D(DebugCamera.Camera);
 
-                world.Draw(TickDelta);
+                    world.Draw(deltaTime, DebugCamera.Camera);
 
-                foreach (var player in Players.Values)
-                    player.Draw(TickDelta);
+                    foreach (var player in Players.Values)
+                        player.Draw(deltaTime);
 
-                Raylib.EndMode2D();
-                Raylib.EndDrawing();
+                    Raylib.EndMode2D();
+
+                    // UI
+                    UI.DrawText($"FPS: {Raylib.GetFPS()}\nGen completed: {world.PercentComplete}%", Vector2.Zero);
+                    Raylib.EndDrawing();
+                }
+
+                previousTimer = currentTimer;
             }
 
             Network.Stop();

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using SlumWarriorsCommon.Networking;
 using Raylib_cs;
 using SlumWarriorsCommon.Utils;
+using SlumWarriorsServer.Utils;
 
 namespace SlumWarriorsServer.Terrain
 {
@@ -15,10 +16,15 @@ namespace SlumWarriorsServer.Terrain
     {
         public Block BlockAheadPlayer = new Block();
 
-        private Chunk[,] renderedChunks = new Chunk[8, 8];
+        private Chunk[,] renderedChunks = new Chunk[64, 64];
 
         private int sqrtRenderDistance;
         private FastNoiseLite noise = new FastNoiseLite();
+
+        private Thread? chunkThread;
+
+        public int PercentComplete = 0;
+        private int genCounter = 0;
 
         public void Start()
         {
@@ -26,13 +32,16 @@ namespace SlumWarriorsServer.Terrain
 
             noise.SetSeed(new Random().Next(int.MinValue, int.MaxValue));
 
-            generateAllChunks();
+            chunkThread = new Thread(() => generateAllChunks());
+            chunkThread.Start();
         }
 
         bool sent = false;
 
         public void Update(float tickDelta)
         {
+            PercentComplete = (int)Math.Round((double)(100 * genCounter) / (256 * renderedChunks.Length));
+
             foreach (var player in Engine.Players.Values)
             {
                 if (player != null)
@@ -48,7 +57,14 @@ namespace SlumWarriorsServer.Terrain
                         {
                             for (int cy = 0; cy < sqrtRenderDistance; cy++)
                             {
-                                Network.SendChunk(player.Peer, renderedChunks[cx, cy], "wu");
+                                var chunk = renderedChunks[cx, cy];
+
+                                if (player.HasSpawned)
+                                {
+                                    // TODO: Sometimes crashes client
+                                    if (Vector2.Distance(player.Position, chunk.Info.Position) < 64f)
+                                        Network.SendChunk(player.Peer, renderedChunks[cx, cy], "wu");
+                                }
                             }
                         }
 
@@ -58,7 +74,7 @@ namespace SlumWarriorsServer.Terrain
             }
         }
 
-        public void Draw(float tickDelta)
+        public void Draw(float tickDelta, Camera2D cam)
         {
             for (int cx = 0; cx < sqrtRenderDistance; cx++)
             {
@@ -68,18 +84,27 @@ namespace SlumWarriorsServer.Terrain
                     {
                         for (int y = 0; y < 16; y++)
                         {
-                            var block = renderedChunks[cx, cy].Blocks[x, y];
+                            if (chunkThread != null && chunkThread.ThreadState != ThreadState.Running)
+                            {
+                                var block = renderedChunks[cx, cy].Blocks[x, y];
 
-                            var blockRect = new Rectangle(block.Position.X,
-                                    block.Position.Y, 1f, 1f);
+                                var blockRect = new Rectangle(block.Position.X,
+                                        block.Position.Y, 1f, 1f);
 
-                            Raylib.DrawRectangleLinesEx(blockRect, 0.1f, Block.Colors[block.Info.Type]);
+                                // TODO: Doesn't reduce lag, somehow...
+                                if (Vector2.Distance(block.Position, Raylib.GetScreenToWorld2D(
+                                    Raylib.GetMousePosition(), cam)) < 64f)
+                                {
+                                    Raylib.DrawRectangleLinesEx(blockRect, 0.1f, Block.Colors[block.Info.Type]);
+                                }
+                            }
                         }
                     }
                 }
             }
         }
 
+        // TODO: Make chunk generation multi-threaded (oh boi here we go)
         private void generateAllChunks()
         {
             for (int cx = 0; cx < sqrtRenderDistance; cx++)
@@ -202,6 +227,8 @@ namespace SlumWarriorsServer.Terrain
                     currentBlock.ChunkInfo = chunk.Info;
 
                     chunk.Blocks[x, y] = currentBlock;
+
+                    genCounter++;
                 }
             }
 
