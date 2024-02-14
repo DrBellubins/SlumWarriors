@@ -26,8 +26,13 @@ namespace SlumWarriorsClient.Terrain
 
                 if (rec != null)
                 {
-                    var cData = Network.DeserializeChunk(rec.Reader.RawData);
-                    Chunks.Add(cData);
+                    var chunk = Network.DeserializeChunk(rec.Reader.RawData);
+
+                    if (chunk != null) // TODO: Validate chunk integrity
+                    {
+                        Console.WriteLine($"Received chunk pos: {chunk.Info.Position}");
+                        Chunks.Add(chunk);
+                    }
                 }
             }
         }

@@ -43,8 +43,6 @@ namespace SlumWarriorsServer.Entities
                 Position = spawnPos;
                 Network.SendVector2(Peer, Position, "pu");
             }
-
-            HasSpawned = true;
         }
 
         // Runs every tick

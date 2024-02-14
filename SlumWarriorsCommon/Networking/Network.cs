@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using SlumWarriorsCommon.Terrain;
+using SlumWarriorsCommon.Utils;
 
 namespace SlumWarriorsCommon.Networking
 {
@@ -170,6 +171,7 @@ namespace SlumWarriorsCommon.Networking
         {
             var byteList = new List<byte>();
 
+            byteList.AddRange(BitConverter.GetBytes(343434)); // Integrity check
             byteList.AddRange(BitConverter.GetBytes(chunk.Info.Position.X));
             byteList.AddRange(BitConverter.GetBytes(chunk.Info.Position.Y));
 
@@ -184,10 +186,13 @@ namespace SlumWarriorsCommon.Networking
             return byteList.ToArray();
         }
 
-        public static Chunk DeserializeChunk(byte[] chunkBytes)
+        public static Chunk? DeserializeChunk(byte[] chunkBytes)
         {
-            var chunk = new Chunk();
+            Chunk? chunk;
             var index = 4; // Skip header
+
+            var integrityCheck = BitConverter.ToInt32(chunkBytes, index);
+            index += sizeof(int);
 
             var cPosX = BitConverter.ToSingle(chunkBytes, index);
             index += sizeof(float);
@@ -195,25 +200,34 @@ namespace SlumWarriorsCommon.Networking
             var cPosY = BitConverter.ToSingle(chunkBytes, index);
             index += sizeof(float);
 
-            chunk.Info.Position = new Vector2(cPosX, cPosY);
-
-            for (int x = 0; x < chunk.Blocks.GetLength(0); x++)
+            if (integrityCheck == 343434) // Valid chunk packet
             {
-                for (int y = 0; y < chunk.Blocks.GetLength(1); y++)
+                chunk = new Chunk();
+                chunk.Info.Position = new Vector2(cPosX, cPosY);
+
+                for (int x = 0; x < chunk.Blocks.GetLength(0); x++)
                 {
-                    var block = new Block();
+                    for (int y = 0; y < chunk.Blocks.GetLength(1); y++)
+                    {
+                        var block = new Block();
 
-                    block.Info.Type = (BlockType)BitConverter.ToInt32(chunkBytes, index);
-                    index += sizeof(int);
+                        block.Info.Type = (BlockType)BitConverter.ToInt32(chunkBytes, index);
+                        index += sizeof(int);
 
-                    block.Layer = 0; // TODO: Always set 0 on client
-                    block.Position = new Vector2(cPosX + x, cPosY + y) - new Vector2(0.5f, 0.5f);
+                        block.Layer = 0; // TODO: Always set 0 on client
+                        block.Position = new Vector2(cPosX + x, cPosY + y) - new Vector2(0.5f, 0.5f);
 
-                    chunk.Blocks[x, y] = block;
+                        chunk.Blocks[x, y] = block;
+                    }
                 }
-            }
 
-            return chunk;
+                return chunk;
+            }
+            else
+            {
+                Console.WriteLine($"invalid chunk integrity key: {integrityCheck}");
+                return null;
+            }
         }
     }
 }

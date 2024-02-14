@@ -35,8 +35,6 @@ namespace SlumWarriorsServer.Terrain
             chunkThread.Start();
         }
 
-        bool sent = false;
-
         public void Update(float tickDelta)
         {
             PercentComplete = (int)Math.Round((double)(100 * genCounter) / (256 * renderedChunks.Length));
@@ -53,7 +51,7 @@ namespace SlumWarriorsServer.Terrain
                     player.CollisionCheck[2] = GetBlockAtPos(player.Position + Vector2.UnitY); // down
                     player.CollisionCheck[3] = GetBlockAtPos(player.Position + -Vector2.UnitY); // up
 
-                    if (player.Peer != null && !sent)
+                    if (player.Peer != null && !player.HasSpawned)
                     {
                         for (int cx = 0; cx < sqrtRenderDistance; cx++)
                         {
@@ -61,19 +59,19 @@ namespace SlumWarriorsServer.Terrain
                             {
                                 var chunk = renderedChunks[cx, cy];
 
-                                if (player.HasSpawned && chunk != null)
+                                if (chunk != null)
                                 {
                                     var cPlayerPos = GameMath.NearestChunkCoord(player.Position);
 
                                     // TODO: Sometimes sends corrupted chunks to client
-                                    // Or just doesn't send chunks at all
+                                    // Or just doesn't send chunks at all (might be packet corruption?)
                                     if (Vector2.Distance(cPlayerPos, chunk.Info.Position) < 64f)
                                         Network.SendChunk(player.Peer, chunk, "wu");
                                 }
                             }
                         }
 
-                        sent = true; // TODO: not executed per-player
+                        player.HasSpawned = true;
                     }
                 }
             }
