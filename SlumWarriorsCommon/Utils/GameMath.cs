@@ -34,7 +34,17 @@ namespace SlumWarriorsCommon.Utils
             return min + (float)(xorRND * xorMaxRatio * (max - min));
         }
 
-        public static Vector2 GetNearestChunkCoord(Vector2 input)
+        public static bool InRange(float val, float min, float max)
+        {
+            return val <= max && val >= min;
+        }
+
+        public static bool InRange(int val, int min, int max)
+        {
+            return val <= max && val >= min;
+        }
+
+        public static Vector2 NearestChunkCoord(Vector2 input)
         {
             int x = (int)MathF.Floor(input.X);
             int y = (int)MathF.Floor(input.Y);
@@ -45,9 +55,9 @@ namespace SlumWarriorsCommon.Utils
             return new Vector2(x - xRem, y - yRem);
         }
 
-        public static Vector2 GetNearestBlockCoord(Vector2 input)
+        public static Vector2 NearestBlockCoord(Vector2 input)
         {
-            return new Vector2(MathF.Round(input.X) - 0.5f, MathF.Round(input.Y) - 0.5f);
+            return new Vector2(MathF.Round(input.X), MathF.Round(input.Y));
         }
     }
 }

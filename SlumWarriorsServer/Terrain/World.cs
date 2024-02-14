@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using SlumWarriorsCommon.Networking;
 using Raylib_cs;
 using SlumWarriorsCommon.Utils;
-using SlumWarriorsServer.Utils;
 
 namespace SlumWarriorsServer.Terrain
 {
@@ -42,6 +41,9 @@ namespace SlumWarriorsServer.Terrain
         {
             PercentComplete = (int)Math.Round((double)(100 * genCounter) / (256 * renderedChunks.Length));
 
+            if (PercentComplete < 100)
+                Console.WriteLine($"Gen progress: {PercentComplete}");
+
             foreach (var player in Engine.Players.Values)
             {
                 if (player != null)
@@ -59,11 +61,14 @@ namespace SlumWarriorsServer.Terrain
                             {
                                 var chunk = renderedChunks[cx, cy];
 
-                                if (player.HasSpawned)
+                                if (player.HasSpawned && chunk != null)
                                 {
-                                    // TODO: Sometimes crashes client
-                                    if (Vector2.Distance(player.Position, chunk.Info.Position) < 64f)
-                                        Network.SendChunk(player.Peer, renderedChunks[cx, cy], "wu");
+                                    var cPlayerPos = GameMath.NearestChunkCoord(player.Position);
+
+                                    // TODO: Sometimes sends corrupted chunks to client
+                                    // Or just doesn't send chunks at all
+                                    if (Vector2.Distance(cPlayerPos, chunk.Info.Position) < 64f)
+                                        Network.SendChunk(player.Peer, chunk, "wu");
                                 }
                             }
                         }
@@ -247,7 +252,7 @@ namespace SlumWarriorsServer.Terrain
                 var rndX = GameMath.GetXorFloat(-(renderedChunks.Length / 2), renderedChunks.Length / 2);
                 var rndY = GameMath.GetXorFloat(-(renderedChunks.Length / 2), renderedChunks.Length / 2);
 
-                rndVec = GameMath.GetNearestBlockCoord(new Vector2(rndX, rndY)) + new Vector2(0.5f, 0.5f);
+                rndVec = GameMath.NearestBlockCoord(new Vector2(rndX, rndY));
 
                 blockCheck = GetBlockAtPos(rndVec);
 

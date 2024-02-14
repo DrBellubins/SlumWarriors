@@ -7,63 +7,75 @@ using System.Numerics;
 
 using Raylib_cs;
 
-namespace SlumWarriorsServer.Utils
+namespace SlumWarriorsCommon.Utils
 {
     public class UI
     {
+        private static int screenWidth = 0;
+        private static int screenHeight = 0;
+
+        private static Font mainFont;
+
+        public static void Init(int width, int height, Font font)
+        {
+            screenWidth = width;
+            screenHeight = height;
+            mainFont = font;
+        }
+
         public static Vector2 CenterPivot
         {
-            get { return new Vector2((float)Engine.ScreenWidth / 2f, (float)Engine.ScreenHeight / 2f); }
+            get { return new Vector2((float)screenWidth / 2f, (float)screenHeight / 2f); }
         }
 
         public static Vector2 TopCenterPivot
         {
-            get { return new Vector2((float)Engine.ScreenWidth / 2f, 0f); }
+            get { return new Vector2((float)screenWidth / 2f, 0f); }
         }
 
         public static Vector2 BottomCenterPivot
         {
-            get { return new Vector2((float)Engine.ScreenWidth / 2f, (float)Engine.ScreenHeight); }
+            get { return new Vector2((float)screenWidth / 2f, (float)screenHeight); }
         }
 
         public static Vector2 LeftCenterPivot
         {
-            get { return new Vector2(0f, (float)Engine.ScreenHeight / 2f); }
+            get { return new Vector2(0f, (float)screenHeight / 2f); }
         }
 
         public static Vector2 RightCenterPivot
         {
-            get { return new Vector2((float)Engine.ScreenWidth, (float)Engine.ScreenHeight / 2f); }
+            get { return new Vector2((float)screenWidth, (float)screenHeight / 2f); }
         }
 
         public static void DrawText(string text, Vector2 position)
         {
-            Raylib.DrawTextEx(Engine.MainFont, text, position, 28, 0.0f, Color.White);
+            Raylib.DrawTextEx(mainFont, text, position, 28, 0.0f, Color.White);
         }
 
         public static void DrawText(string text, float size, Vector2 position)
         {
-            Raylib.DrawTextEx(Engine.MainFont, text, position, size, 0.0f, Color.White);
+            Raylib.DrawTextEx(mainFont, text, position, size, 0.0f, Color.White);
         }
 
         public static void DrawText(string text, Vector2 position, Color color)
         {
-            Raylib.DrawTextEx(Engine.MainFont, text, position, 28, 0.0f, color);
+            Raylib.DrawTextEx(mainFont, text, position, 28, 0.0f, color);
         }
 
         public static void DrawText(string text, float size, Vector2 position, Color color)
         {
-            Raylib.DrawTextEx(Engine.MainFont, text, position, size, 0.0f, color);
+            Raylib.DrawTextEx(mainFont, text, position, size, 0.0f, color);
         }
 
         public static void DrawText(string text, float x, float y)
         {
-            Raylib.DrawTextEx(Engine.MainFont, text, new Vector2(x, y), 28, 0.0f, Color.White);
+            Raylib.DrawTextEx(mainFont, text, new Vector2(x, y), 28, 0.0f, Color.White);
         }
 
         public static void DrawText(string text, float size, float x, float y)
         {
-            Raylib.DrawTextEx(Engine.MainFont, text, new Vector2(x, y), size, 0.0f, Color.White);
+            Raylib.DrawTextEx(mainFont, text, new Vector2(x, y), size, 0.0f, Color.White);
         }
 
         public static Rectangle CenterRect(Rectangle rect)

@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <Folder Include="Networking\" />
+    <Folder Include="Utils\" />
   </ItemGroup>
 
 </Project>

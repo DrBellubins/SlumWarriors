@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Raylib_cs;
 
 using static Raylib_cs.Raylib;
+using SlumWarriorsCommon.Utils;
 
 namespace SlumWarriorsClient.Terrain
 {
@@ -25,7 +26,8 @@ namespace SlumWarriorsClient.Terrain
 
                 if (rec != null)
                 {
-                    Chunks.Add(Network.DeserializeChunk(rec.Reader.RawData));
+                    var cData = Network.DeserializeChunk(rec.Reader.RawData);
+                    Chunks.Add(cData);
                 }
             }
         }

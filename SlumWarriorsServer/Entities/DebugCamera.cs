@@ -1,6 +1,6 @@
 ﻿using Raylib_cs;
 using SlumWarriorsCommon.Systems;
-using SlumWarriorsServer.Utils;
+using SlumWarriorsCommon.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;

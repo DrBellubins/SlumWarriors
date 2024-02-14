@@ -11,7 +11,6 @@ using SlumWarriorsCommon.Terrain;
 using Raylib_cs;
 using SlumWarriorsCommon.Utils;
 using System.Numerics;
-using SlumWarriorsServer.Utils;
 
 namespace SlumWarriorsServer
 {
@@ -20,7 +19,7 @@ namespace SlumWarriorsServer
         public const int TickRate = 60;
         public const int TickDelay = (int)((1f / TickRate) * 1000f);
         //public const float TickDelta = 1.0f / TickRate;
-        public const bool DrawDebugWindow = false;
+        public const bool DrawDebugWindow = true;
 
         public static bool IsRunning;
 
@@ -47,6 +46,7 @@ namespace SlumWarriorsServer
                 MainFont = Raylib.LoadFontEx("Assets/Fonts/VarelaRound-Regular.ttf", 64, null, 250);
             }
 
+            UI.Init(ScreenWidth, ScreenHeight, MainFont);
             Block.InitializeBlockPrefabs(true);
 
             var previousTimer = DateTime.Now;
@@ -111,12 +111,20 @@ namespace SlumWarriorsServer
 
                     world.Draw(deltaTime, DebugCamera.Camera);
 
+                    var mouseWorldPos = Raylib.GetScreenToWorld2D(Raylib.GetMousePosition(), DebugCamera.Camera);
+
                     foreach (var player in Players.Values)
+                    {
+                        Raylib.DrawLineEx(mouseWorldPos, player.Position, 0.1f, Color.Blue);
                         player.Draw(deltaTime);
+                    }
 
                     Raylib.EndMode2D();
 
                     // UI
+                    var mouseBlockPos = GameMath.NearestBlockCoord(mouseWorldPos);
+                    UI.DrawText($"Pos: {mouseBlockPos}", 14, Raylib.GetMousePosition() + new Vector2(25, 0));
+
                     UI.DrawText($"FPS: {Raylib.GetFPS()}\nGen completed: {world.PercentComplete}%", Vector2.Zero);
                     Raylib.EndDrawing();
                 }
