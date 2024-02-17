@@ -45,8 +45,8 @@ namespace SlumWarriorsCommon.Networking
         public static EventBasedNetListener Listener = new EventBasedNetListener();
         public static NetManager Manager = new NetManager(Listener);
 
-        private static Queue<NetSend> sendQueue = new Queue<NetSend>();
-        private static List<NetReceive> receiveQueue = new List<NetReceive>();
+        public static Queue<NetSend> SendQueue = new Queue<NetSend>();
+        public static List<NetReceive> ReceiveQueue = new List<NetReceive>();
 
         public static void Start(bool isServer)
         {
@@ -79,7 +79,7 @@ namespace SlumWarriorsCommon.Networking
                 var tag = dataReader.PeekString(2);
 
                 var receive = new NetReceive(tag, fromPeer, dataReader);
-                receiveQueue.Add(receive);
+                ReceiveQueue.Add(receive);
             };
         }
 
@@ -90,9 +90,9 @@ namespace SlumWarriorsCommon.Networking
 
         public static void Update()
         {
-            for (int i = 0; i < sendQueue.Count; i++)
+            for (int i = 0; i < SendQueue.Count; i++)
             {
-                var send = sendQueue.Dequeue();
+                var send = SendQueue.Dequeue();
 
                 if (send.Peer != null)
                     send.Peer.Send(send.Writer, DeliveryMethod.ReliableOrdered);
@@ -111,13 +111,13 @@ namespace SlumWarriorsCommon.Networking
 
         public static NetReceive? Receive(NetPeer peer, string tag)
         {
-            foreach (var receive in receiveQueue)
+            foreach (var receive in ReceiveQueue)
             {
                 if (receive.Tag == tag && receive.Peer == peer)
                 {
                     var recTag = receive.Reader.GetString(2); // Must be called to remove tag from buffer!
 
-                    receiveQueue.Remove(receive);
+                    ReceiveQueue.Remove(receive);
                     return receive;
                 }
             }
@@ -132,7 +132,7 @@ namespace SlumWarriorsCommon.Networking
             writer.Put(integer);
 
             var com = new NetSend(peer, writer);
-            sendQueue.Enqueue(com);
+            SendQueue.Enqueue(com);
         }
 
         public static void SendSingle(NetPeer peer, float single, string tag)
@@ -142,7 +142,7 @@ namespace SlumWarriorsCommon.Networking
             writer.Put(single);
 
             var com = new NetSend(peer, writer);
-            sendQueue.Enqueue(com);
+            SendQueue.Enqueue(com);
         }
 
         public static void SendVector2(NetPeer peer, Vector2 vec, string tag)
@@ -153,7 +153,7 @@ namespace SlumWarriorsCommon.Networking
             writer.Put(vec.Y);
 
             var com = new NetSend(peer, writer);
-            sendQueue.Enqueue(com);
+            SendQueue.Enqueue(com);
         }
 
         public static void SendChunk(NetPeer peer, Chunk chunk, string tag)
@@ -163,7 +163,18 @@ namespace SlumWarriorsCommon.Networking
             writer.Put(SerializeChunk(chunk));
 
             var com = new NetSend(peer, writer);
-            sendQueue.Enqueue(com);
+            SendQueue.Enqueue(com);
+        }
+
+        public static void SendChunkInfo(NetPeer peer, ChunkInfo info, string tag)
+        {
+            var writer = new NetDataWriter();
+            writer.Put(tag);
+            writer.Put(info.Position.X);
+            writer.Put(info.Position.Y);
+
+            var com = new NetSend(peer, writer);
+            SendQueue.Enqueue(com);
         }
 
         // TODO (maybe): Only send chunks as a block type grid

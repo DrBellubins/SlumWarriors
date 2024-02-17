@@ -69,7 +69,9 @@ namespace SlumWarriorsServer
                 var player = new Player(PlayersInitialized);
                 player.Peer = peer;
 
-                var spawnPos = Task.Run(() => world.GetSpawnPos());
+                Network.SendInt(peer, WorldGen.Seed, "si"); // spawn info
+
+                var spawnPos = Task.Run(() => WorldGen.GetSpawnPos());
                 player.Start(spawnPos.Result);
             };
 
@@ -125,7 +127,7 @@ namespace SlumWarriorsServer
                     var mouseBlockPos = GameMath.NearestBlockCoord(mouseWorldPos);
                     UI.DrawText($"Pos: {mouseBlockPos}", 14, Raylib.GetMousePosition() + new Vector2(25, 0));
 
-                    UI.DrawText($"FPS: {Raylib.GetFPS()}\nGen completed: {world.PercentComplete}%", Vector2.Zero);
+                    //UI.DrawText($"FPS: {Raylib.GetFPS()}\nGen completed: {world.PercentComplete}%", Vector2.Zero);
                     Raylib.EndDrawing();
                 }
 

@@ -49,20 +49,20 @@ namespace SlumWarriorsClient.Entities
                     Position = new Vector2(rec.Reader.GetFloat(), rec.Reader.GetFloat());
             }
 
-            isMoving = IsKeyPressed(KeyboardKey.W) || IsKeyPressed(KeyboardKey.S)
-                || IsKeyPressed(KeyboardKey.D) || IsKeyPressed(KeyboardKey.A);
+            isMoving = IsKeyDown(KeyboardKey.W) || IsKeyDown(KeyboardKey.S)
+                || IsKeyDown(KeyboardKey.D) || IsKeyDown(KeyboardKey.A);
 
             // Update movement
-            if (IsKeyPressed(KeyboardKey.W))
+            if (IsKeyDown(KeyboardKey.W))
                 movement = MoveDirection.Up;
 
-            if (IsKeyPressed(KeyboardKey.S))
+            if (IsKeyDown(KeyboardKey.S))
                 movement = MoveDirection.Down;
 
-            if (IsKeyPressed(KeyboardKey.D))
+            if (IsKeyDown(KeyboardKey.D))
                 movement = MoveDirection.Right;
 
-            if (IsKeyPressed(KeyboardKey.A))
+            if (IsKeyDown(KeyboardKey.A))
                 movement = MoveDirection.Left;
 
             // Send movement

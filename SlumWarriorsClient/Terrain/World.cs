@@ -18,15 +18,27 @@ namespace SlumWarriorsClient.Terrain
     {
         public List<Chunk> Chunks = new List<Chunk>();
 
+        public void Start()
+        {
+            if (Engine.Server != null)
+            {
+                var rec = Network.Receive(Engine.Server, "si"); // seed info
+
+                if (rec != null)
+                    WorldGen.Start(rec.Reader.GetInt()); // TODO: get world seed from server
+            }
+        }
+
         public void Update(float deltaTime)
         {
             if (Engine.Server != null)
             {
-                var rec = Network.Receive(Engine.Server, "wu"); // world update
+                var rec = Network.Receive(Engine.Server, "cu"); // chunk update
 
                 if (rec != null)
                 {
-                    var chunk = Network.DeserializeChunk(rec.Reader.RawData);
+                    var chunkInfo = new ChunkInfo(false, false, new Vector2(rec.Reader.GetFloat(), rec.Reader.GetFloat()));
+                    var chunk = WorldGen.GenerateChunk(chunkInfo.Position);
 
                     if (chunk != null) // TODO: Validate chunk integrity
                     {

@@ -35,6 +35,15 @@ namespace SlumWarriorsCommon.Terrain
         public bool Generated; // Runtime quality-of-life check
         public bool Modified;
         public Vector2 Position;
+
+        public ChunkInfo()  {}
+
+        public ChunkInfo(bool generated, bool modified, Vector2 position)
+        {
+            Generated = generated;
+            Modified = modified;
+            Position = position;
+        }
     }
 
     public class Chunk
