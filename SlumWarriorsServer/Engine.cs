@@ -69,8 +69,6 @@ namespace SlumWarriorsServer
                 var player = new Player(PlayersInitialized);
                 player.Peer = peer;
 
-                Network.SendInt(peer, WorldGen.Seed, "si"); // spawn info
-
                 var spawnPos = Task.Run(() => WorldGen.GetSpawnPos());
                 player.Start(spawnPos.Result);
             };

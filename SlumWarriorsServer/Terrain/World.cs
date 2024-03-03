@@ -9,11 +9,10 @@ using SlumWarriorsCommon.Networking;
 using Raylib_cs;
 using SlumWarriorsCommon.Utils;
 
-using static SlumWarriorsCommon.Terrain.WorldGen;
+using static SlumWarriorsServer.Terrain.WorldGen;
 
 namespace SlumWarriorsServer.Terrain
 {
-    // TODO: Collision no longer works...
     public class World
     {
         public Block BlockAheadPlayer = new Block();
@@ -51,10 +50,11 @@ namespace SlumWarriorsServer.Terrain
                                 {
                                     var cPlayerPos = GameMath.NearestChunkCoord(player.Position);
 
+                                    // TODO: Only sent once, needs to update with player movement
                                     // TODO: Not all chunks get sent (might be packet corruption?)
                                     if (Vector2.Distance(cPlayerPos, chunk.Info.Position) < 64f)
-                                        Network.SendChunkInfo(player.Peer, chunk.Info, "cu");
-                                        //Network.SendChunk(player.Peer, chunk, "wu");
+                                        Network.SendChunk(player.Peer, chunk, "cu");
+                                        //Network.SendChunkInfo(player.Peer, chunk.Info, "cu");
                                 }
                             }
                         }

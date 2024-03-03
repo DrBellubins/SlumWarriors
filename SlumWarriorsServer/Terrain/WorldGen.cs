@@ -1,4 +1,5 @@
-﻿using SlumWarriorsCommon.Utils;
+﻿using SlumWarriorsCommon.Terrain;
+using SlumWarriorsCommon.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +7,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SlumWarriorsCommon.Terrain
+namespace SlumWarriorsServer.Terrain
 {
     public class WorldGen
     {
